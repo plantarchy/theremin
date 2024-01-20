@@ -14,6 +14,8 @@ export class Human {
         this.onExpire = onExpire;
         this.expiry = setTimeout(onExpire, 500);
         this.id = id;
+        this.prevLeftGesture = null;
+        this.prevRightGesture = null;
     }
 
     updatePose(pose, hands) {
@@ -110,6 +112,14 @@ export class Human {
                 lineWidth: 2
             });
         }
+        if (this.leftHand?.gesture[0]["categoryName"] === "Open_Palm" && this.prevLeftGesture !== "Open_Palm") {
+            console.log("STAB LEFT");
+        }
+        if (this.rightHand?.gesture[0]["categoryName"] === "Open_Palm" && this.prevRightGesture !== "Open_Palm") {
+            console.log("STAB RIGHT");
+        }
+        this.prevLeftGesture = this.leftHand?.gesture[0]["categoryName"];
+        this.prevRightGesture = this.rightHand?.gesture[0]["categoryName"];
     }
 
     getCenter() {
