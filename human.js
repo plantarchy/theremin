@@ -17,7 +17,6 @@ export class Human {
     }
 
     updatePose(pose, hands) {
-        console.log(hands)
         this.resetExpiry();
         this.pose = pose;
         this.leftWrist = this.pose.keypoints[9];
@@ -45,7 +44,6 @@ export class Human {
         let bestRightDist = 99999999999999;
         for (const [index, landmarks] of (hands.landmarks || []).entries()) {
             if (landmarks?.length <= 0) continue;
-            console.log(this.id, landmarks[0], this.leftWrist);
             const leftDist = (landmarks[0].x - this.leftWrist.x)**2 + (landmarks[0].y - this.leftWrist.y)**2;
             const rightDist = (landmarks[0].x - this.rightWrist.x)**2 + (landmarks[0].y - this.rightWrist.y)**2;
             if (leftDist < bestLeftDist) {// && hands.handedness[index][0].categoryName == "Left") {
@@ -104,9 +102,6 @@ export class Human {
                 lineWidth: 2
             });
         }
-
-        // console.log("update human", this.id, this.getCenter());
-
     }
 
     getCenter() {
