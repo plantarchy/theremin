@@ -18,6 +18,7 @@ const synth = new Tone.Synth().toDestination();
 // Function to play a sound
 async function playSound() {
   // Trigger a note
+  console.log("play")
   const samples = await mvae.sample(1);
   await player.start(samples[0]);
   window.requestAnimationFrame(playSound);

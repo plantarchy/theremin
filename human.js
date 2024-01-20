@@ -35,6 +35,9 @@ export class Human {
         this.rightWrist.x = this.rightWrist.x / this.video.videoWidth;
         this.rightWrist.y = this.rightWrist.y / this.video.videoHeight;
 
+        this.leftHand = hands.left || null;
+        this.rightHand = hands.right || null;
+
         let lastPoint;
         const scale = this.video.videoWidth / this.video.offsetWidth;
         for (const point of pose.keypoints) {
@@ -47,46 +50,6 @@ export class Human {
             lastPoint = point;
         }
 
-        let bestLeft = null;
-        let bestLeftDist = 99999999999999;
-        let bestRight = null;
-        let bestRightDist = 99999999999999;
-        for (const [index, landmarks] of (hands.landmarks || []).entries()) {
-            if (landmarks?.length <= 0) continue;
-            const leftDist = (landmarks[0].x - this.leftWrist.x)**2 + (landmarks[0].y - this.leftWrist.y)**2;
-            const rightDist = (landmarks[0].x - this.rightWrist.x)**2 + (landmarks[0].y - this.rightWrist.y)**2;
-            if (leftDist < bestLeftDist) {// && hands.handedness[index][0].categoryName == "Left") {
-                bestLeftDist = leftDist;
-                bestLeft = {
-                    gesture: hands.gestures[index],
-                    x: hands.landmarks[index][0].x,
-                    y: hands.landmarks[index][0].y,
-                    landmarks,
-                    index,
-
-                };
-            }
-            if (rightDist < bestRightDist) {
-                bestRightDist = rightDist;
-                bestRight = {
-                    gesture: hands.gestures[index],
-                    x: hands.landmarks[index][0].x,
-                    y: hands.landmarks[index][0].y,
-                    landmarks,
-                    index,
-                };
-            }
-        }
-        if (this.leftWrist.score > 0.1) {
-            this.leftHand = bestLeft;
-        } else {
-            this.leftHand = null;
-        }
-        if (this.rightWrist.score > 0.1) {
-            this.rightHand = bestRight;
-        } else {
-            this.rightHand = null;
-        }
         if (this.leftHand?.landmarks) {
             window.matchedHands.add(this.leftHand.index);
             let landmarks = this.leftHand.landmarks;
@@ -142,6 +105,7 @@ export class Human {
         if (this.leftHand?.gesture[0]["categoryName"] === "Closed_Fist" && this.prevLeftGesture !== "Closed_Fist") {
             const now = Tone.now();
             this.synth.triggerRelease(this.playing, now);
+            this.pitchShift.pitch = (0);
         }
         if (this.rightHand?.gesture[0]["categoryName"] === "Open_Palm") {
             console.log("STAB RIGHT");
