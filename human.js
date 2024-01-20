@@ -14,15 +14,48 @@ const vaeWorker = new Worker('/worker.js');
 Tone.start();
 vaeWorker.postMessage({});
 
+//frontend interfacing
+
+let slideToggle = document.getElementById("slideToggle").ariaChecked;
+
+
+
+
 export class Human {
     constructor(id, video, pose, hands, ctx, onExpire) {
         this.player = new core.Player();
         this.errorCounter = 5;
         this.intervalCounter = 0;
 
-        this.filter = new Tone.Filter(20000, "lowpass").toDestination();
-        this.pitchShift = new Tone.PitchShift().connect(this.filter);
-        this.synth = new Tone.PolySynth(Tone.Synth).connect(this.pitchShift);
+        Tone.Transport.bpm.value = 120;
+
+        this.chordReverb = new Tone.Freeverb().toDestination();
+        this.chordFilter = new Tone.Filter(20000, "lowpass").connect(this.chordReverb);
+        this.pitchShift = new Tone.PitchShift().connect(this.chordFilter);
+        this.chordSynth = new Tone.PolySynth(Tone.Synth).connect(this.pitchShift);
+        this.chordSynth.set({ volume: -20 });
+
+        this.leadSynth = new Tone.Synth({
+            oscillator: {
+                type: "sawtooth"
+            },
+            envelope: {
+                attack: 0.1,
+                decay: 0.2,
+                sustain: 1.0,
+                release: 0.3
+            },
+            volume: 0
+        }).toDestination();
+
+        Tone.Transport.scheduleRepeat(time => {
+            osc.start(time).stop(time + 0.1);
+        }, "4n");
+
+
+        this.leadSynth.sync();
+        this.chordSynth.sync();
+        Tone.Transport.start();
 
         this.playing = [];
         this.video = video;
@@ -33,7 +66,7 @@ export class Human {
         this.expiry = setTimeout(onExpire, 500);
         this.expiry2 = setTimeout(() => {
             const now = Tone.now();
-            this.synth.triggerRelease(this.playing, now);
+            this.chordSynth.triggerRelease(this.playing, now);
         }, 500)
         this.id = id;
         this.prevLeftGesture = null;
@@ -42,6 +75,7 @@ export class Human {
         
         //magenta stuff
         this.player = new core.Player();
+
     }
 
     updatePose(pose, hands) {
@@ -104,30 +138,32 @@ export class Human {
         }
         if (this.leftHand?.gesture[0]["categoryName"] === "Open_Palm") {
             if (this.intervalCounter % 5 === 0) {
-                this.filter.frequency.value = 20000*(this.leftHand.x)**4;
+                this.chordFilter.frequency.value = 20000*(this.leftHand.x)**4;
             }
             if (this.prevLeftGesture !== "Open_Palm") {
                 const now = Tone.now();
-                this.synth.triggerRelease(this.playing, now);
+                this.chordSynth.triggerRelease(this.playing, now);
                 this.playing = [];
                 const normal = (Math.max(0.20, Math.min(0.80, this.leftHand.y)) - 0.20) * (1 / 0.60);
                 const note = notes[Math.min(Math.floor(normal * notes.length), notes.length - 1)];
                 console.log(normal, note, teoria.note(note));
-                const chord = teoria.note(note).chord("maj");
+                const chord = teoria.note(note).chord("maj"); //FRONT END INTEGRATION
                 for (let n of chord.notes()) {
-                    this.synth.triggerAttack(n.scientific(), now);
+                    this.chordSynth.triggerAttack(n.scientific(), now);
                     this.playing.push(n.scientific());
                 }
                 this.prevLeftPos = normal;
             } else {
                 const now = Tone.now();
-                const normal = (Math.max(0.20, Math.min(0.80, this.leftHand.y)) - 0.20) * (1 / 0.60);
-                this.pitchShift.pitch = ((normal - this.prevLeftPos) * 4);
+                if (slideToggle) {
+                    const normal = (Math.max(0.20, Math.min(0.80, this.leftHand.y)) - 0.20) * (1 / 0.60);
+                    this.pitchShift.pitch = ((normal - this.prevLeftPos) * 4);
+                }
             }
         }
         if (this.leftHand?.gesture[0]["categoryName"] === "Closed_Fist" && this.prevLeftGesture !== "Closed_Fist") {
             const now = Tone.now();
-            this.synth.triggerRelease(this.playing, now);
+            this.chordSynth.triggerRelease(this.playing, now);
         }
         if (this.rightHand?.gesture[0]["categoryName"] === "Open_Palm") {
             if (this.prevRightGesture !== "Open_Palm") {
@@ -182,7 +218,7 @@ export class Human {
         this.expiry = setTimeout(this.onExpire, 500);
         this.expiry2 = setTimeout(() => {
             const now = Tone.now();
-            this.synth.triggerRelease(this.playing, now);
+            this.chordSynth.triggerRelease(this.playing, now);
         }, 500)
     }
 
@@ -204,3 +240,13 @@ async function leadMelody(human) {
     }
   };
 }
+
+
+
+
+//frontend interfacing
+
+
+document.getElementById("slideToggle").addEventListener("click", () => {
+    slideToggle = !slideToggle;
+})
