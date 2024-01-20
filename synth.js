@@ -12,7 +12,7 @@ const player = new core.Player();
 const worker = new Worker('/worker.js');
 
 document.getElementById("playButton").addEventListener("click", () => {
-  worker.postMessage({});
+  worker.postMessage({"sequence": []});
   worker.onmessage = async (event) => {
     if (event.data.fyi) {
       console.log(event.data.fyi);
