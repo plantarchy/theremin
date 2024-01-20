@@ -14,7 +14,7 @@ let poseDetector;
         modelType: poseDetection.movenet.modelType.MULTIPOSE_LIGHTNING,
         modelUrl: "/movenet-multipose.json",
         enableTracking: true,
-        trackerType: poseDetection.TrackerType.BoundingBox
+        trackerType: poseDetection.TrackerType.Keypoint
     };
     poseDetector = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet, poseDetectorConfig);
 })()
@@ -34,7 +34,6 @@ export async function predictWebcam(video, gestureRecognizer, ctx) {
         poseResults = await poseDetector.estimatePoses(video);
     }
     if (handResults?.landmarks || poseResults?.length > 0) {
-        console.log(poseResults);
         ctx.save();
         ctx.clearRect(0, 0, video.offsetWidth, video.offsetHeight);
         const drawingUtils = new DrawingUtils(ctx);
@@ -57,23 +56,14 @@ export async function predictWebcam(video, gestureRecognizer, ctx) {
         // }
         ctx.restore();
         ctx.save();
+        window.matchedHands = new Set();
         for (const person of (poseResults || [])) {
-            let lastPoint;
-            for (const point of person.keypoints) {
-                if (point.score < 0.1) continue;
-                ctx.fillStyle = "#FFF";
-                ctx.beginPath();
-                ctx.ellipse(point.x / scale, point.y / scale, 5, 5, 0, 0, 2 * Math.PI);
-                ctx.closePath();
-                ctx.fill();
-                lastPoint = point;
-            }
             ctx.save();
             if (person.id in humans) {
                 humans[person.id].updatePose(person, (handResults || []));
             } else {
                 console.log("add person", person.id)
-                humans[person.id] = new Human(person.id, video, person, handResults, drawingUtils, () => {
+                humans[person.id] = new Human(person.id, video, person, handResults, ctx, () => {
                     // On expire, remove
                     console.log("remove person", person.id);
                     delete humans[person.id];

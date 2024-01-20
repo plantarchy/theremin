@@ -1,13 +1,15 @@
 import {
+    DrawingUtils,
     GestureRecognizer,
 } from '@mediapipe/tasks-vision';
 
 const COLORS = ["#FF0000", "#00FF00", "#0000FF"];
 
 export class Human {
-    constructor(id, video, pose, hands, drawingUtils, onExpire) {
+    constructor(id, video, pose, hands, ctx, onExpire) {
         this.video = video;
-        this.drawingUtils = drawingUtils;
+        this.ctx = ctx;
+        this.drawingUtils = new DrawingUtils(ctx);
         this.updatePose(pose, hands);
         this.onExpire = onExpire;
         this.expiry = setTimeout(onExpire, 500);
@@ -15,6 +17,7 @@ export class Human {
     }
 
     updatePose(pose, hands) {
+        console.log(hands)
         this.resetExpiry();
         this.pose = pose;
         this.leftWrist = this.pose.keypoints[9];
@@ -24,15 +27,28 @@ export class Human {
         this.rightWrist.x = this.rightWrist.x / this.video.videoWidth;
         this.rightWrist.y = this.rightWrist.y / this.video.videoHeight;
 
+        let lastPoint;
+        const scale = this.video.videoWidth / this.video.offsetWidth;
+        for (const point of pose.keypoints) {
+            if (point.score < 0.1) continue;
+            this.ctx.fillStyle = COLORS[this.id % 3];
+            this.ctx.beginPath();
+            this.ctx.ellipse(point.x / scale, point.y / scale, 5, 5, 0, 0, 2 * Math.PI);
+            this.ctx.closePath();
+            this.ctx.fill();
+            lastPoint = point;
+        }
+
         let bestLeft = null;
         let bestLeftDist = 99999999999999;
         let bestRight = null;
         let bestRightDist = 99999999999999;
         for (const [index, landmarks] of (hands.landmarks || []).entries()) {
             if (landmarks?.length <= 0) continue;
+            console.log(this.id, landmarks[0], this.leftWrist);
             const leftDist = (landmarks[0].x - this.leftWrist.x)**2 + (landmarks[0].y - this.leftWrist.y)**2;
             const rightDist = (landmarks[0].x - this.rightWrist.x)**2 + (landmarks[0].y - this.rightWrist.y)**2;
-            if (leftDist < bestLeftDist && hands.handedness[index][0].categoryName == "Left") {
+            if (leftDist < bestLeftDist) {// && hands.handedness[index][0].categoryName == "Left") {
                 bestLeftDist = leftDist;
                 bestLeft = {
                     gesture: hands.gestures[index],
@@ -43,7 +59,7 @@ export class Human {
 
                 };
             }
-            if (rightDist < bestRightDist && hands.handedness[index][0].categoryName == "Right") {
+            if (rightDist < bestRightDist) {
                 bestRightDist = rightDist;
                 bestRight = {
                     gesture: hands.gestures[index],
@@ -57,7 +73,7 @@ export class Human {
         this.leftHand = bestLeft;
         this.rightHand = bestRight;
         if (this.leftHand?.landmarks) {
-            hands.landmarks[this.leftHand.index]
+            window.matchedHands.add(this.leftHand.index);
             let landmarks = this.leftHand.landmarks;
             this.drawingUtils.drawConnectors(
                 landmarks,
@@ -73,6 +89,7 @@ export class Human {
             });
         }
         if (this.rightHand?.landmarks) {
+            window.matchedHands.add(this.rightHand.index);
             let landmarks = this.rightHand.landmarks;
             this.drawingUtils.drawConnectors(
                 landmarks,
@@ -88,13 +105,14 @@ export class Human {
             });
         }
 
-        console.log("update human", this.id, this.getCenter());
+        // console.log("update human", this.id, this.getCenter());
+
     }
 
     getCenter() {
         let shoulderX = (this.pose.keypoints[5].x + this.pose.keypoints[6].x) / (2 * this.video.videoWidth);
         let shoulderY = (this.pose.keypoints[5].y + this.pose.keypoints[6].y) / (2 * this.video.videoHeight);
-        let hipX = (this.pose.keypoints[11].y + this.pose.keypoints[12].y) / (2 * this.video.videoHeight);
+        let hipX = (this.pose.keypoints[11].x + this.pose.keypoints[12].x) / (2 * this.video.videoWidth);
         let hipY = (this.pose.keypoints[11].y + this.pose.keypoints[12].y) / (2 * this.video.videoHeight);
         let x = (shoulderX + hipX) / 2;
         let y = (shoulderY + hipY) / 2;
