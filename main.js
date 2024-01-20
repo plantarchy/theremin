@@ -25,7 +25,7 @@ window.onload = async () => {
       delegate: "GPU"
     },
     runningMode: "VIDEO",
-    numHands: 2
+    numHands: 8
   });
   const video = document.querySelector("#video-container video");
   const canvas = document.querySelector("#video-container canvas");
