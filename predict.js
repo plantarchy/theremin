@@ -18,16 +18,23 @@ let poseDetector;
 
 let lastVideoTime = -1;
 const canvas = document.querySelector("#video-container canvas");
+const wrists = [];
 
 export async function predictWebcam(video, gestureRecognizer, ctx) {
     let nowInMs = Date.now();
     let handResults, poseResults;
+    const scale = video.videoWidth / video.offsetWidth;
+
     if (video.currentTime !== lastVideoTime) {
         lastVideoTime = video.currentTime;
         handResults = gestureRecognizer.recognizeForVideo(video, nowInMs);
+        if (handResults?.landmarks.length > 0) {
+            console.log(handResults.landmarks[0][0].x * video.offsetWidth, handResults.landmarks[0][0].y * video.offsetHeight);
+        }
         poseResults = await poseDetector.estimatePoses(video);
     }
     if (handResults?.landmarks || poseResults?.length > 0) {
+        console.log(handResults)
         ctx.save();
         ctx.clearRect(0, 0, video.offsetWidth, video.offsetHeight);
         const drawingUtils = new DrawingUtils(ctx);
@@ -54,10 +61,9 @@ export async function predictWebcam(video, gestureRecognizer, ctx) {
             let lastPoint;
             for (const point of person.keypoints) {
                 if (point.score < 0.1) continue;
-                console.log("draw", point);
                 ctx.fillStyle = "#FFF";
                 ctx.beginPath();
-                ctx.ellipse(point.x, point.y, 5, 5, 0, 0, 2 * Math.PI);
+                ctx.ellipse(point.x / scale, point.y / scale, 5, 5, 0, 0, 2 * Math.PI);
                 ctx.closePath();
                 ctx.fill();
                 lastPoint = point;
