@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html class= "font-Roboto" lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
@@ -7,16 +7,19 @@
     <title>Theremin</title>
     </head>
     
-    <body class="font-serif min-h-screen bg-zinc-900">
+    <body class="min-h-screen justify-center bg-gradient-to-b from-stone-900 to-bg-zinc-700">
     
       <p class="text-3xl pt-5 text-zinc-200">Theremin</p>
-      <div id="content" class="">
-        <main id="video-container">
+      <div id="content" class="flex flex-row gap-5 content-center">
+        <!-- VIDEO -->
+        <div class="flex-basis-5/7" id="video-container">
           <video class="flex" autoplay playsinline></video>
           <canvas class="absolute"></canvas>
-        </main>
-        <nav>
-          <p class="text-2xl">Record</p>
+        </div>
+
+        <!-- NAV MENU -->
+        <div class="py-2 flex-grow rounded-2xl px-4 bg-white" >
+          <p class="text-2xl text-stone-700">Record</p>
           <div class="inline-flex items-center">
             <!-- ACTIVATE            -->
             <button id="toggleActivation" type="button"
@@ -28,7 +31,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round"
                   d="M17.25 9.75 19.5 12m0 0 2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6 4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75" />
               </svg>
-              <span id="textActivate">Activate</span>
+              <span id="textActivate">Sound On</span>
             </button>
     
             <script>
@@ -45,10 +48,10 @@
                   // Update SVG and text based on the state
                   if (isStart) {
                     svgIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M17.25 9.75 19.5 12m0 0 2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6 4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.7" />';
-                    buttonText.innerText = 'Activate';
+                    buttonText.innerText = 'Sound On ';
                   } else {
                     svgIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 0 1 0 12.728M16.463 8.288a5.25 5.25 0 0 1 0 7.424M6.75 8.25l4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z" />';
-                    buttonText.innerText = 'Deactivate';
+                    buttonText.innerText = 'Sound Off';
                   }
                 });
               });
@@ -98,7 +101,6 @@
                   mediaRecorder.ondataavailable = function (event) {
                     if (event.data.size > 0) {
                       chunks.push(event.data);
-                      downloadButton.disabled = false;
                     }
                   };
 
@@ -109,13 +111,14 @@
                   };
 
                   mediaRecorder.start();
-                  downloadButton.disabled = false;
+                  downloadButton.disabled = true;
                   downloadButton.classList.add('opacity-50');
                 }
 
                 function stopRecording() {
                   if (mediaRecorder && mediaRecorder.state !== 'inactive') {
                     downloadButton.classList.remove('opacity-50');
+                    downloadButton.disabled = false;
                     mediaRecorder.stop();
                   }
 
@@ -135,7 +138,7 @@
                     console.log('no!!');
                   } else {
                     svgIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M5.25 7.5A2.25 2.25 0 0 1 7.5 5.25h9a2.25 2.25 0 0 1 2.25 2.25v9a2.25 2.25 0 0 1-2.25 2.25h-9a2.25 2.25 0 0 1-2.25-2.25v-9Z" />';
-                    buttonText.innerText = 'Stop Recording';
+                    buttonText.innerText = 'Stop     ';
                     startRecording();
                     console.log('recording!!');
                   }
@@ -156,8 +159,8 @@
     
           </div>
     
-          <div>
-            <p class="text-2xl">Lead</p>
+          <div class="py-3">
+            <p class="text-2xl text-stone-700">Lead</p>
             <div class="relative inline-block text-left">
               <div>
                 <button type="button"
@@ -217,8 +220,8 @@
           </script>
     
          <!--pop hiphop trap  -->
-         <div>
-          <p class="text-2xl">Beat Style</p>
+         <div class="py-3">
+          <p class="text-2xl text-stone-700">Beat Style</p>
           <div class="relative inline-block text-left">
             <div>
               <button type="button" id="beat-menu"
@@ -249,7 +252,12 @@
               </div>
             </div>
           </div>
-        </div>
+
+          <div class="py-3">
+            <p class="text-2xl text-stone-700 ">Audio Options</p>
+            <input id="btn" type="checkbox"><!-- will be hidden -->
+            </div>
+  
   
         <script>
           document.addEventListener('DOMContentLoaded', function () {
@@ -274,7 +282,8 @@
             });
           });
         </script> 
-        </nav>
+        </div>
+        
     
       </div>
       <script type="module" src="/main.js"></script>

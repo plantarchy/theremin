@@ -17,23 +17,20 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-#content {
+/* #content {
   display: grid;
   padding-top: 2.5%;
   padding-bottom: 1%;
   width: 100vw;
   height: 80vh;
   grid-template-areas:
-      "main main main main nav"
-      "main main main main nav"
-      "main main main main nav";
+      "main  nav";
     column-gap: 10px;
 
 }
 
 #content > * {
   height: 85vh;
-  
 }
 #content > main {
   grid-area: main;
@@ -51,7 +48,7 @@
 
 #content > rec {
   grid-area: rec;
-}
+} */
 
 video {
   width: 100%;
@@ -59,6 +56,9 @@ video {
   /* displa */
 }
 
+html {
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Roboto, "Inter", "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; /* 4 */
+}
 
 
 a {
