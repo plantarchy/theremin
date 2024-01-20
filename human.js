@@ -48,13 +48,13 @@ export class Human {
             volume: 0
         }).toDestination();
 
-        Tone.Transport.scheduleRepeat(time => {
-            osc.start(time).stop(time + 0.1);
-        }, "4n");
+        //Tone.Transport.scheduleRepeat(time => {
+        //    osc.start(time).stop(time + 0.2);
+        //}, "4n");
 
 
         this.leadSynth.sync();
-        this.chordSynth.sync();
+        //this.chordSynth.sync();
         Tone.Transport.start();
 
         this.playing = [];
