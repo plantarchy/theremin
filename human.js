@@ -4,13 +4,21 @@ import {
 } from '@mediapipe/tasks-vision';
 import * as Tone from 'tone';
 import * as teoria from 'teoria';
+import * as core from '@magenta/music/esm/core';
+import * as music_vae from '@magenta/music/esm/music_vae';
 
 const COLORS = ["#FF0000", "#00FF00", "#0000FF"];
 const notes = ["C4", "D4", "E4", "F4", "G4", "A4", "B4"];
 
+
+const mvae = new music_vae.MusicVAE('https://storage.googleapis.com/magentadata/js/checkpoints/music_vae/mel_2bar_small');
+mvae.initialize().then(() => {});
+
 export class Human {
     constructor(id, video, pose, hands, ctx, onExpire) {
-        this.synth = new Tone.PolySynth(Tone.Synth).toDestination();
+        this.errorCounter = 5;
+        this.pitchShift = new Tone.PitchShift().toDestination();
+        this.synth = new Tone.PolySynth(Tone.Synth).connect(this.pitchShift);
         this.playing = [];
         this.video = video;
         this.ctx = ctx;
@@ -18,9 +26,17 @@ export class Human {
         this.updatePose(pose, hands);
         this.onExpire = onExpire;
         this.expiry = setTimeout(onExpire, 500);
+        this.expiry2 = setTimeout(() => {
+            const now = Tone.now();
+            this.synth.triggerRelease(this.playing, now);
+        }, 500)
         this.id = id;
         this.prevLeftGesture = null;
+        this.prevLeftPos = null;
         this.prevRightGesture = null;
+        
+        //magenta stuff
+        this.player = new core.Player();
     }
 
     updatePose(pose, hands) {
@@ -32,6 +48,9 @@ export class Human {
         this.leftWrist.y = this.leftWrist.y / this.video.videoHeight;
         this.rightWrist.x = this.rightWrist.x / this.video.videoWidth;
         this.rightWrist.y = this.rightWrist.y / this.video.videoHeight;
+
+        this.leftHand = hands.left || null;
+        this.rightHand = hands.right || null;
 
         let lastPoint;
         const scale = this.video.videoWidth / this.video.offsetWidth;
@@ -45,46 +64,6 @@ export class Human {
             lastPoint = point;
         }
 
-        let bestLeft = null;
-        let bestLeftDist = 99999999999999;
-        let bestRight = null;
-        let bestRightDist = 99999999999999;
-        for (const [index, landmarks] of (hands.landmarks || []).entries()) {
-            if (landmarks?.length <= 0) continue;
-            const leftDist = (landmarks[0].x - this.leftWrist.x)**2 + (landmarks[0].y - this.leftWrist.y)**2;
-            const rightDist = (landmarks[0].x - this.rightWrist.x)**2 + (landmarks[0].y - this.rightWrist.y)**2;
-            if (leftDist < bestLeftDist) {// && hands.handedness[index][0].categoryName == "Left") {
-                bestLeftDist = leftDist;
-                bestLeft = {
-                    gesture: hands.gestures[index],
-                    x: hands.landmarks[index][0].x,
-                    y: hands.landmarks[index][0].y,
-                    landmarks,
-                    index,
-
-                };
-            }
-            if (rightDist < bestRightDist) {
-                bestRightDist = rightDist;
-                bestRight = {
-                    gesture: hands.gestures[index],
-                    x: hands.landmarks[index][0].x,
-                    y: hands.landmarks[index][0].y,
-                    landmarks,
-                    index,
-                };
-            }
-        }
-        if (this.leftWrist.score > 0.1) {
-            this.leftHand = bestLeft;
-        } else {
-            this.leftHand = null;
-        }
-        if (this.rightWrist.score > 0.1) {
-            this.rightHand = bestRight;
-        } else {
-            this.rightHand = null;
-        }
         if (this.leftHand?.landmarks) {
             window.matchedHands.add(this.leftHand.index);
             let landmarks = this.leftHand.landmarks;
@@ -117,17 +96,24 @@ export class Human {
                 lineWidth: 2
             });
         }
-        if (this.leftHand?.gesture[0]["categoryName"] === "Open_Palm" && this.prevLeftGesture !== "Open_Palm") {
-            const now = Tone.now();
-            this.synth.triggerRelease(this.playing, now);
-            this.playing = [];
-            const normal = (Math.max(0.20, Math.min(0.80, this.leftHand.y)) - 0.20) * (1 / 0.60);
-            const note = notes[Math.min(Math.floor(normal * notes.length), notes.length - 1)];
-            console.log(normal, note, teoria.note(note));
-            const chord = teoria.note(note).chord("maj");
-            for (let n of chord.notes()) {
-                this.synth.triggerAttack(n.scientific(), now);
-                this.playing.push(n.scientific());
+        if (this.leftHand?.gesture[0]["categoryName"] === "Open_Palm") {
+            if (this.prevLeftGesture !== "Open_Palm") {
+                const now = Tone.now();
+                this.synth.triggerRelease(this.playing, now);
+                this.playing = [];
+                const normal = (Math.max(0.20, Math.min(0.80, this.leftHand.y)) - 0.20) * (1 / 0.60);
+                const note = notes[Math.min(Math.floor(normal * notes.length), notes.length - 1)];
+                console.log(normal, note, teoria.note(note));
+                const chord = teoria.note(note).chord("maj");
+                for (let n of chord.notes()) {
+                    this.synth.triggerAttack(n.scientific(), now);
+                    this.playing.push(n.scientific());
+                }
+                this.prevLeftPos = normal;
+            } else {
+                const now = Tone.now();
+                const normal = (Math.max(0.20, Math.min(0.80, this.leftHand.y)) - 0.20) * (1 / 0.60);
+                this.pitchShift.pitch = ((normal - this.prevLeftPos) * 4);
             }
         }
         if (this.leftHand?.gesture[0]["categoryName"] === "Closed_Fist" && this.prevLeftGesture !== "Closed_Fist") {
@@ -135,7 +121,11 @@ export class Human {
             this.synth.triggerRelease(this.playing, now);
         }
         if (this.rightHand?.gesture[0]["categoryName"] === "Open_Palm") {
-            console.log("STAB RIGHT");
+            if (this.prevRightGesture !== "Open_Palm") {
+                leadMelody(this).then(() =>{
+                    console.log("STAB RIGHT");
+                });
+            }
         }
         this.prevLeftGesture = this.leftHand?.gesture[0]["categoryName"];
         this.prevRightGesture = this.rightHand?.gesture[0]["categoryName"];
@@ -174,6 +164,19 @@ export class Human {
 
     resetExpiry() {
         clearTimeout(this.expiry);
+        clearTimeout(this.expiry2);
         this.expiry = setTimeout(this.onExpire, 500);
+        this.expiry2 = setTimeout(() => {
+            const now = Tone.now();
+            this.synth.triggerRelease(this.playing, now);
+        }, 500)
     }
+
+}
+async function leadMelody(human) {
+    console.log("urmom");
+    const samples = await mvae.sample(2);
+    console.log("urdad", samples, samples[0]);
+    await human.player.start(samples[0]);
+    console.log("um");
 }

@@ -1,5 +1,15 @@
 import * as Tone from 'tone'
+import * as core from '@magenta/music/esm/core';
+import * as music_vae from '@magenta/music/esm/music_vae';
 
+
+const player = new core.Player();
+//...
+const mvae = new music_vae.MusicVAE('https://storage.googleapis.com/magentadata/js/checkpoints/music_vae/mel_2bar_small');
+mvae.initialize().then(() => {
+});
+
+// Trigger a note
 // Initialize Tone.js
 Tone.start();
 
@@ -7,9 +17,11 @@ Tone.start();
 const synth = new Tone.Synth().toDestination();
 
 // Function to play a sound
-function playSound() {
-  // Trigger a note
-  synth.triggerAttackRelease("C4", "2n");
+async function playSound() {
+
+    const samples = await mvae.sample(1);
+    await player.start(samples[0]);
+    window.requestAnimationFrame(playSound);
 }
 
 // Attach click event listener to the button
