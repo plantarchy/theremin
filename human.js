@@ -16,6 +16,7 @@ mvae.initialize().then(() => {});
 
 export class Human {
     constructor(id, video, pose, hands, ctx, onExpire) {
+        this.errorCounter = 5;
         this.pitchShift = new Tone.PitchShift().toDestination();
         this.synth = new Tone.PolySynth(Tone.Synth).connect(this.pitchShift);
         this.playing = [];
@@ -114,7 +115,6 @@ export class Human {
         if (this.leftHand?.gesture[0]["categoryName"] === "Closed_Fist" && this.prevLeftGesture !== "Closed_Fist") {
             const now = Tone.now();
             this.synth.triggerRelease(this.playing, now);
-            this.pitchShift.pitch = (0);
         }
         if (this.rightHand?.gesture[0]["categoryName"] === "Open_Palm") {
             if (this.prevRightGesture !== "Open_Palm") {

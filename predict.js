@@ -88,12 +88,14 @@ export async function predictWebcam(video, gestureRecognizer, ctx) {
             }
 
             // NOTE: Handedness is reversed??
-            if (bestWrist.handedness === "Left" && bestWrist.confidence > 0.1) {
-                lefts[bestWrist.id] = bestWrist;
-            } else if (bestWrist.handedness === "Right" && bestWrist.confidence > 0.1) {
-                rights[bestWrist.id] = bestWrist;
+            console.log(bestWrist)
+            if (bestWrist) {
+                if (bestWrist.handedness === "Left" && bestWrist.confidence > 0.1) {
+                    lefts[bestWrist.id] = bestWrist;
+                } else if (bestWrist.handedness === "Right" && bestWrist.confidence > 0.1) {
+                    rights[bestWrist.id] = bestWrist;
+                }
             }
-
         }
         
         ctx.restore();
