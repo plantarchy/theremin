@@ -1,41 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <style>
-        /* Add custom styles for gradient splash background */
-        body {
-            background: radial-gradient(circle, #6B46C1, #2D3748);
-            background-size: cover;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
-        }
 
-    </style>
-    <title>Theremin</title>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    /* Add custom styles for gradient splash background */
+    body {
+      /* background: radial-gradient(circle, #6B46C1, #2D3748); */
+      background: radial-gradient(circle, #2892bc, #6bf064);
+      /* background-color: white; */
+      background-size: cover;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+    }
+
+    /* Center the content vertically */
+    .text-white {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Adjust the arrow size by modifying the d attribute */
+    #makeithappen svg {
+      width: 85px;
+      height: 85px;
+    }
+  </style>
+  <title>theremin</title>
 </head>
 
 <body>
-    <div class="text-white">
-        <!-- Your content goes here -->
-        <h1 class="text-9xl font-bold">Theremin.</h1>
-        <p class="mt-4 text-2xl">Where your movements become music.</p>
-        
-        <button id="makeithappen" type="button" class="text-gray-700 px-4 py-2 my-10 text-xl bg-white shadow-lg ring-1 ring-black ring-opacity-5 transition inline-flex items-center mr-2">
-          Make it happen.
-        </button>
-    </div>
+  <div class="text-white grid grid-flow-col">
+    <!-- Your content goes here -->
+    <span class="text-9xl font-bold filter drop-shadow-2xl">theremin</span>
+    <p class="mt-4 text-2xl filter drop-shadow-2xl">where your movements become music</p>
 
-    <script type="text/javascript">
-        document.getElementById("makeithappen").onclick = function () {
-          location.href = "//localhost:5173"
-        };
-    </script>
+    <button id="makeithappen" type="button"
+      class="text-white hover:text-gray-800 transition px-4 py-2 inline-flex items-center mr-2">
+      <!-- <span id="textActivate">Explore </span> -->
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m12.75 15 3-3m0 0-3-3m3 3h-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+      </svg>
+      
+      <!-- <svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev/svgjs" viewBox="0 0 800 800"><g stroke-width="22" stroke="hsl(227, 71%, 57%)" fill="none" stroke-linecap="square" transform="matrix(0.7071067811865474,-0.7071067811865477,0.7071067811865477,0.7071067811865474,-193.68542494923804,386.0000000000001)"><line x1="238.5" y1="238.5" x2="561.5" y2="561.5" marker-end="url(#SvgjsMarker1455)"></line></g><defs><marker markerWidth="5.5" markerHeight="5.5" refX="2.75" refY="2.75" viewBox="0 0 5.5 5.5" orient="auto" id="SvgjsMarker1455"><polygon points="0,5.5 1.8333333333333333,2.75 0,0 5.5,2.75" fill="hsl(227, 71%, 57%)"></polygon></marker></defs></svg> -->
+    </button>
+  </div>
+
+  <script type="text/javascript">
+    document.getElementById("makeithappen").onclick = function () {
+      location.href = "//localhost:5173"
+    };
+  </script>
 </body>
 </html>
 
