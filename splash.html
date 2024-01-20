@@ -1,2 +1,41 @@
-hi
-<p class="text-3xl">HeLLo!!!</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* Add custom styles for gradient splash background */
+        body {
+            background: radial-gradient(circle, #6B46C1, #2D3748);
+            background-size: cover;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+
+    </style>
+    <title>Theremin</title>
+</head>
+
+<body>
+    <div class="text-white">
+        <!-- Your content goes here -->
+        <h1 class="text-9xl font-bold">Theremin.</h1>
+        <p class="mt-4 text-2xl">Where your movements become music.</p>
+        
+        <button id="makeithappen" type="button" class="text-gray-700 px-4 py-2 my-10 text-xl bg-white shadow-lg ring-1 ring-black ring-opacity-5 transition inline-flex items-center mr-2">
+          Make it happen.
+        </button>
+    </div>
+
+    <script type="text/javascript">
+        document.getElementById("makeithappen").onclick = function () {
+          location.href = "//localhost:5173"
+        };
+    </script>
+</body>
+</html>
+

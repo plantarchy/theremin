@@ -1,29 +1,27 @@
-import * as Tone from 'tone'
-import * as core from '@magenta/music/esm/core';
-import * as music_vae from '@magenta/music/esm/music_vae';
-
+import {
+    GestureRecognizer,
+    DrawingUtils,
+    PoseLandmarker
+} from '@mediapipe/tasks-vision';
+import * as core from '@magenta/music/es6/core.js';
+import * as poseDetection from '@tensorflow-models/pose-detection';
+import * as tf from '@tensorflow/tfjs-core';
+import * as Tone from 'tone';
 
 const player = new core.Player();
-//...
-const mvae = new music_vae.MusicVAE('https://storage.googleapis.com/magentadata/js/checkpoints/music_vae/mel_2bar_small');
-mvae.initialize().then(() => {
-});
+const worker = new Worker('/worker.js');
 
-// Trigger a note
-// Initialize Tone.js
-Tone.start();
-
-// Create a simple synth
-const synth = new Tone.Synth().toDestination();
-
-// Function to play a sound
-async function playSound() {
-
-    const samples = await mvae.sample(1);
-    await player.start(samples[0]);
-    window.requestAnimationFrame(playSound);
-}
-
-// Attach click event listener to the button
-const playButton = document.getElementById("playButton");
-playButton.addEventListener("click", playSound);
+document.getElementById("playButton").addEventListener("click", () => {
+  worker.postMessage({});
+  worker.onmessage = async (event) => {
+    if (event.data.fyi) {
+      console.log(event.data.fyi);
+    } else {
+      const sample = event.data.sample;
+      console.log("Sampel", sample);
+      await player.start(sample);
+      worker.postMessage({});
+      // Do something with this sample
+    }
+  };
+})
