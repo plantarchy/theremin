@@ -4,9 +4,15 @@ import {
 } from '@mediapipe/tasks-vision';
 import * as Tone from 'tone';
 import * as teoria from 'teoria';
+import * as core from '@magenta/music/esm/core';
+import * as music_vae from '@magenta/music/esm/music_vae';
 
 const COLORS = ["#FF0000", "#00FF00", "#0000FF"];
 const notes = ["C4", "D4", "E4", "F4", "G4", "A4", "B4"];
+
+
+const mvae = new music_vae.MusicVAE('https://storage.googleapis.com/magentadata/js/checkpoints/music_vae/mel_2bar_small');
+mvae.initialize().then(() => {});
 
 export class Human {
     constructor(id, video, pose, hands, ctx, onExpire) {
@@ -23,6 +29,9 @@ export class Human {
         this.prevLeftGesture = null;
         this.prevLeftPos = null;
         this.prevRightGesture = null;
+        
+        //magenta stuff
+        this.player = new core.Player();
     }
 
     updatePose(pose, hands) {
@@ -108,7 +117,11 @@ export class Human {
             this.pitchShift.pitch = (0);
         }
         if (this.rightHand?.gesture[0]["categoryName"] === "Open_Palm") {
-            console.log("STAB RIGHT");
+            if (this.prevRightGesture !== "Open_Palm") {
+                leadMelody(this).then(() =>{
+                    console.log("STAB RIGHT");
+                });
+            }
         }
         this.prevLeftGesture = this.leftHand?.gesture[0]["categoryName"];
         this.prevRightGesture = this.rightHand?.gesture[0]["categoryName"];
@@ -147,9 +160,14 @@ export class Human {
 
     resetExpiry() {
         clearTimeout(this.expiry);
-        this.expiry = setTimeout(() => {
-            this.synth.releaseAll();
-            this.onExpire
-        }, 500);
+        this.expiry = setTimeout(this.onExpire, 500);
     }
+
+}
+async function leadMelody(human) {
+    console.log("urmom");
+    const samples = await mvae.sample(2);
+    console.log("urdad", samples, samples[0]);
+    await human.player.start(samples[0]);
+    console.log("um");
 }

@@ -9,6 +9,7 @@ const mvae = new music_vae.MusicVAE('https://storage.googleapis.com/magentadata/
 mvae.initialize().then(() => {
 });
 
+// Trigger a note
 // Initialize Tone.js
 Tone.start();
 
@@ -17,11 +18,10 @@ const synth = new Tone.Synth().toDestination();
 
 // Function to play a sound
 async function playSound() {
-  // Trigger a note
-  console.log("play")
-  const samples = await mvae.sample(1);
-  await player.start(samples[0]);
-  window.requestAnimationFrame(playSound);
+
+    const samples = await mvae.sample(1);
+    await player.start(samples[0]);
+    window.requestAnimationFrame(playSound);
 }
 
 // Attach click event listener to the button
