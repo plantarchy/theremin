@@ -68,8 +68,16 @@ export class Human {
                 };
             }
         }
-        this.leftHand = bestLeft;
-        this.rightHand = bestRight;
+        if (this.leftWrist.score > 0.1) {
+            this.leftHand = bestLeft;
+        } else {
+            this.leftHand = null;
+        }
+        if (this.rightWrist.score > 0.1) {
+            this.rightHand = bestRight;
+        } else {
+            this.rightHand = null;
+        }
         if (this.leftHand?.landmarks) {
             window.matchedHands.add(this.leftHand.index);
             let landmarks = this.leftHand.landmarks;
