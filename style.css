@@ -15,6 +15,8 @@
 
 #content {
   display: grid;
+  padding-top: 2.5%;
+  padding-bottom: 1%;
   width: 100vw;
   height: 80vh;
   grid-template-areas:
@@ -44,7 +46,7 @@
 video {
   width: 100%;
   height: auto;
-  display-flex
+  /* display-flex */
 
 }
 
