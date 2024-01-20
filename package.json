@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@mediapipe/tasks-vision": "^0.10.9",
+    "@tensorflow/tfjs-converter": "^4.16.0",
+    "@tensorflow/tfjs-core": "^4.16.0",
     "tone": "^14.7.77"
   }
 }
