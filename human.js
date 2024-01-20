@@ -1,11 +1,12 @@
-import {
-    DrawingUtils,
-    GestureRecognizer,
-} from '@mediapipe/tasks-vision';
 import * as Tone from 'tone';
 import * as teoria from 'teoria';
 import * as core from '@magenta/music/esm/core';
 import * as music_vae from '@magenta/music/esm/music_vae';
+
+import {
+    DrawingUtils,
+    GestureRecognizer,
+} from '@mediapipe/tasks-vision';
 
 const COLORS = ["#FF0000", "#00FF00", "#0000FF"];
 const notes = ["C4", "D4", "E4", "F4", "G4", "A4", "B4"];
@@ -17,8 +18,12 @@ mvae.initialize().then(() => {});
 export class Human {
     constructor(id, video, pose, hands, ctx, onExpire) {
         this.errorCounter = 5;
-        this.pitchShift = new Tone.PitchShift().toDestination();
+        this.intervalCounter = 0;
+
+        this.filter = new Tone.Filter(20000, "lowpass").toDestination();
+        this.pitchShift = new Tone.PitchShift().connect(this.filter);
         this.synth = new Tone.PolySynth(Tone.Synth).connect(this.pitchShift);
+
         this.playing = [];
         this.video = video;
         this.ctx = ctx;
@@ -40,6 +45,7 @@ export class Human {
     }
 
     updatePose(pose, hands) {
+        this.intervalCounter+=1;
         this.resetExpiry();
         this.pose = pose;
         this.leftWrist = this.pose.keypoints[9];
@@ -97,6 +103,9 @@ export class Human {
             });
         }
         if (this.leftHand?.gesture[0]["categoryName"] === "Open_Palm") {
+            if (this.intervalCounter % 5 === 0) {
+                this.filter.frequency.value = 20000*(this.leftHand.x)**4;
+            }
             if (this.prevLeftGesture !== "Open_Palm") {
                 const now = Tone.now();
                 this.synth.triggerRelease(this.playing, now);
@@ -129,6 +138,9 @@ export class Human {
         }
         this.prevLeftGesture = this.leftHand?.gesture[0]["categoryName"];
         this.prevRightGesture = this.rightHand?.gesture[0]["categoryName"];
+        if (this.intervalCounter >= 100) {
+            this.intervalCounter = 0;
+        }
     }
 
     getCenter() {
