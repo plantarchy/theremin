@@ -26,6 +26,10 @@ export class Human {
         this.updatePose(pose, hands);
         this.onExpire = onExpire;
         this.expiry = setTimeout(onExpire, 500);
+        this.expiry2 = setTimeout(() => {
+            const now = Tone.now();
+            this.synth.triggerRelease(this.playing, now);
+        }, 500)
         this.id = id;
         this.prevLeftGesture = null;
         this.prevLeftPos = null;
@@ -160,7 +164,12 @@ export class Human {
 
     resetExpiry() {
         clearTimeout(this.expiry);
+        clearTimeout(this.expiry2);
         this.expiry = setTimeout(this.onExpire, 500);
+        this.expiry2 = setTimeout(() => {
+            const now = Tone.now();
+            this.synth.triggerRelease(this.playing, now);
+        }, 500)
     }
 
 }
