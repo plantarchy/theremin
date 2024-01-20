@@ -10,7 +10,8 @@ const notes = ["C4", "D4", "E4", "F4", "G4", "A4", "B4"];
 
 export class Human {
     constructor(id, video, pose, hands, ctx, onExpire) {
-        this.synth = new Tone.PolySynth(Tone.Synth).toDestination();
+        this.pitchShift = new Tone.PitchShift().toDestination();
+        this.synth = new Tone.PolySynth(Tone.Synth).connect(this.pitchShift);
         this.playing = [];
         this.video = video;
         this.ctx = ctx;
@@ -20,6 +21,7 @@ export class Human {
         this.expiry = setTimeout(onExpire, 500);
         this.id = id;
         this.prevLeftGesture = null;
+        this.prevLeftPos = null;
         this.prevRightGesture = null;
     }
 
@@ -117,17 +119,24 @@ export class Human {
                 lineWidth: 2
             });
         }
-        if (this.leftHand?.gesture[0]["categoryName"] === "Open_Palm" && this.prevLeftGesture !== "Open_Palm") {
-            const now = Tone.now();
-            this.synth.triggerRelease(this.playing, now);
-            this.playing = [];
-            const normal = (Math.max(0.20, Math.min(0.80, this.leftHand.y)) - 0.20) * (1 / 0.60);
-            const note = notes[Math.min(Math.floor(normal * notes.length), notes.length - 1)];
-            console.log(normal, note, teoria.note(note));
-            const chord = teoria.note(note).chord("maj");
-            for (let n of chord.notes()) {
-                this.synth.triggerAttack(n.scientific(), now);
-                this.playing.push(n.scientific());
+        if (this.leftHand?.gesture[0]["categoryName"] === "Open_Palm") {
+            if (this.prevLeftGesture !== "Open_Palm") {
+                const now = Tone.now();
+                this.synth.triggerRelease(this.playing, now);
+                this.playing = [];
+                const normal = (Math.max(0.20, Math.min(0.80, this.leftHand.y)) - 0.20) * (1 / 0.60);
+                const note = notes[Math.min(Math.floor(normal * notes.length), notes.length - 1)];
+                console.log(normal, note, teoria.note(note));
+                const chord = teoria.note(note).chord("maj");
+                for (let n of chord.notes()) {
+                    this.synth.triggerAttack(n.scientific(), now);
+                    this.playing.push(n.scientific());
+                }
+                this.prevLeftPos = normal;
+            } else {
+                const now = Tone.now();
+                const normal = (Math.max(0.20, Math.min(0.80, this.leftHand.y)) - 0.20) * (1 / 0.60);
+                this.pitchShift.pitch = ((normal - this.prevLeftPos) * 4);
             }
         }
         if (this.leftHand?.gesture[0]["categoryName"] === "Closed_Fist" && this.prevLeftGesture !== "Closed_Fist") {
@@ -174,6 +183,9 @@ export class Human {
 
     resetExpiry() {
         clearTimeout(this.expiry);
-        this.expiry = setTimeout(this.onExpire, 500);
+        this.expiry = setTimeout(() => {
+            this.synth.releaseAll();
+            this.onExpire
+        }, 500);
     }
 }
