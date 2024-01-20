@@ -2,11 +2,16 @@ import {
     DrawingUtils,
     GestureRecognizer,
 } from '@mediapipe/tasks-vision';
+import * as Tone from 'tone';
+import * as teoria from 'teoria';
 
 const COLORS = ["#FF0000", "#00FF00", "#0000FF"];
+const notes = ["C4", "D4", "E4", "F4", "G4", "A4", "B4"];
 
 export class Human {
     constructor(id, video, pose, hands, ctx, onExpire) {
+        this.synth = new Tone.PolySynth(Tone.Synth).toDestination();
+        this.playing = [];
         this.video = video;
         this.ctx = ctx;
         this.drawingUtils = new DrawingUtils(ctx);
@@ -113,9 +118,23 @@ export class Human {
             });
         }
         if (this.leftHand?.gesture[0]["categoryName"] === "Open_Palm" && this.prevLeftGesture !== "Open_Palm") {
-            console.log("STAB LEFT");
+            const now = Tone.now();
+            this.synth.triggerRelease(this.playing, now);
+            this.playing = [];
+            const normal = (Math.max(0.20, Math.min(0.80, this.leftHand.y)) - 0.20) * (1 / 0.60);
+            const note = notes[Math.min(Math.floor(normal * notes.length), notes.length - 1)];
+            console.log(normal, note, teoria.note(note));
+            const chord = teoria.note(note).chord("maj");
+            for (let n of chord.notes()) {
+                this.synth.triggerAttack(n.scientific(), now);
+                this.playing.push(n.scientific());
+            }
         }
-        if (this.rightHand?.gesture[0]["categoryName"] === "Open_Palm" && this.prevRightGesture !== "Open_Palm") {
+        if (this.leftHand?.gesture[0]["categoryName"] === "Closed_Fist" && this.prevLeftGesture !== "Closed_Fist") {
+            const now = Tone.now();
+            this.synth.triggerRelease(this.playing, now);
+        }
+        if (this.rightHand?.gesture[0]["categoryName"] === "Open_Palm") {
             console.log("STAB RIGHT");
         }
         this.prevLeftGesture = this.leftHand?.gesture[0]["categoryName"];
