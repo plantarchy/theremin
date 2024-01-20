@@ -18,11 +18,11 @@
         <nav>
           <p class="text-2xl">Record</p>
           <div class="inline-flex items-center">
-            <!-- START            -->
+            <!-- ACTIVATE            -->
             <button id="toggleActivation" type="button"
               class="text-gray-700 block px-4 py-2 text-sm bg-white shadow-lg ring-1 ring-black ring-opacity-5 transition inline-flex items-center mr-2">
     
-              <svg id="svgActivate" class="fill-current w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+              <svg id="svgActivate" class="fill-current w-6 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                 stroke-width="1.0" stroke="currentColor">
                 <!-- Initial SVG content -->
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -53,7 +53,7 @@
                 });
               });
             </script>
-    
+ 
     
             <!-- RECORD -->
             <button id="toggleRecord" type="button"
@@ -65,38 +65,94 @@
               </svg>
               <span id="textRecord">Record</span>
             </button>
-    
+
+            <!-- DOWNLOAD  -->
+            <button disabled id="videoDownload" type="button" download="recorded_video.webm"
+              class="text-gray-700 block px-4 py-2 text-sm bg-white shadow-lg ring-1 ring-black ring-opacity-5 opacity-50 transition inline-flex items-center">
+              <svg class="fill-current w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                <path d="M13 8V2H7v6H2l8 8 8-8h-5zM0 18h20v2H0v-2z" />
+              </svg>
+              <span>Download</span>
+            </button>
+
+
+            <!-- STOPS STARTS AND DOWNLOADS -->
             <script>
               document.addEventListener('DOMContentLoaded', function () {
                 const button = document.getElementById('toggleRecord');
                 const svgIcon = document.getElementById('svgRecord');
                 const buttonText = document.getElementById('textRecord');
 
+                const downloadButton = document.getElementById('videoDownload');
+
+                const video = document.getElementById('video-container'); // Add a video element to your HTML
+                let mediaRecorder;
+                let chunks = [];
+
+
+                async function startRecording() {
+                  const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+
+                  mediaRecorder = new MediaRecorder(stream);
+
+                  mediaRecorder.ondataavailable = function (event) {
+                    if (event.data.size > 0) {
+                      chunks.push(event.data);
+                      downloadButton.disabled = false;
+                    }
+                  };
+
+                  mediaRecorder.onstop = function () {
+                    const blob = new Blob(chunks, { type: 'video/webm' });
+                    const url = URL.createObjectURL(blob);
+                    video.src = url;
+                  };
+
+                  mediaRecorder.start();
+                  downloadButton.disabled = false;
+                  downloadButton.classList.add('opacity-50');
+                }
+
+                function stopRecording() {
+                  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                    downloadButton.classList.remove('opacity-50');
+                    mediaRecorder.stop();
+                  }
+
+                }
+
                 let isStart = true;
 
                 button.addEventListener('click', function () {
-                  // Toggle the state
+                // Toggle the state
                   isStart = !isStart;
                   // Update SVG and text based on the state
                   if (isStart) {
+                    chunks = [];
                     svgIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />';
                     buttonText.innerText = 'Record';
+                    stopRecording();
+                    console.log('no!!');
                   } else {
                     svgIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M5.25 7.5A2.25 2.25 0 0 1 7.5 5.25h9a2.25 2.25 0 0 1 2.25 2.25v9a2.25 2.25 0 0 1-2.25 2.25h-9a2.25 2.25 0 0 1-2.25-2.25v-9Z" />';
                     buttonText.innerText = 'Stop Recording';
+                    startRecording();
+                    console.log('recording!!');
+                  }
+                });
+                downloadButton.addEventListener('click', function () {
+                  if (chunks.length > 0) {
+                    const blob = new Blob(chunks, { type: 'video/webm' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'recorded_video.webm';
+                    a.click();
                   }
                 });
               });
             </script>
     
-    
-            <button type="button"
-              class="text-gray-700 block px-4 py-2 text-sm bg-white shadow-lg ring-1 ring-black ring-opacity-5 transition inline-flex items-center">
-              <svg class="fill-current w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                <path d="M13 8V2H7v6H2l8 8 8-8h-5zM0 18h20v2H0v-2z" />
-              </svg>
-              <span>Download</span>
-            </button>
     
           </div>
     
