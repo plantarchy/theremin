@@ -1,3 +1,4 @@
+import './index.css'
 import './style.css'
 import javascriptLogo from './javascript.svg'
 import viteLogo from '/vite.svg'
@@ -26,12 +27,12 @@ window.onload = async () => {
     runningMode: "VIDEO",
     numHands: 2
   });
-  const video = document.querySelector("#video-container video");
-  const canvas = document.querySelector("#video-container canvas");
-  const ctx = canvas.getContext("2d");
-  await askWebcamPermissions();
-  await captureCamera(video);
-  video.addEventListener("loadeddata", () => predictWebcam(video, gestureRecognizer, ctx));
+  // const video = document.querySelector("#video-container video");
+  // const canvas = document.querySelector("#video-container canvas");
+  // const ctx = canvas.getContext("2d");
+  // await askWebcamPermissions();
+  // await captureCamera(video);
+  // video.addEventListener("loadeddata", () => predictWebcam(video, gestureRecognizer, ctx));
 }
 
 //const poses = await detector.estimatePoses(image);
