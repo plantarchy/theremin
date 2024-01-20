@@ -4,13 +4,18 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite App</title>
+    <title>Theremin</title>
   </head>
   <body>
-    <div id="video-container">
-      <video class="absolute" autoplay playsinline></video>
-      <canvas class="absolute"></canvas>
+
+    <div id="content">
+      <main id="video-container">
+        <video class="flex" autoplay playsinline></video>
+        <canvas class="absolute"></canvas>
+      </main>
+      <nav>Nav</nav>
     </div>
+
     <script type="module" src="/main.js"></script>
   </body>
 </html>

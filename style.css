@@ -13,6 +13,43 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+#content {
+  display: grid;
+  width: 100vw;
+  height: 80vh;
+  grid-template-areas:
+  "main main main main nav"
+  "main main main main nav"
+  "main main main main nav";
+  column-gap: 10px;
+
+}
+
+#content > * {
+  height: 85vh;
+  
+}
+#content > main {
+  grid-area: main;
+  height: auto;
+  background-color: #ffff64;
+}
+
+#content > nav {
+  grid-area: nav;
+  background-color: #ffa08c;
+  /* padding: 60; */
+}
+
+video {
+  width: 100%;
+  height: auto;
+  display-flex
+
+}
+
+
+
 a {
   font-weight: 500;
   color: #646cff;
