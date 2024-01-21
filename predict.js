@@ -53,6 +53,15 @@ let chordSynth = [0, 0, 0, 0, 0].map(() => new Tone.Synth().connect(pitchShift))
 chordSynth.forEach(a => a.set({ volume: -1000 }));
 console.log(chordSynth);
 
+let drumSynth = new Tone.MembraneSynth().toDestination();
+console.log(drumSynth.volume)
+drumSynth.set({ volume: -20 });
+const loopA = new Tone.Loop(time => {
+	drumSynth.triggerAttackRelease("C2", "8n", time);
+}, "4n").start(0);
+Tone.Transport.start()
+Tone.Transport.bpm.set(100)
+
 let slideToggle = false;
 document.getElementById("slideToggle").addEventListener("click", () => {
     slideToggle = !slideToggle;
