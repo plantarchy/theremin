@@ -59,7 +59,6 @@ const drumButton = document.getElementById("majorBtn");
 const beatDropdown = document.getElementById("beat-option");
 const bpmInput = document.getElementById("labels-range-input");
 bpmInput.addEventListener("change", () => {
-    console.log(bpmInput.value)
     Tone.Transport.bpm.value = bpmInput.value;
     amenBreak.playbackRate = bpmInput.value / 120;
 })
@@ -81,31 +80,41 @@ const loopB = new Tone.Loop(time => {
     if (!drumToggle) return;
  hihatSynth.triggerAttackRelease("4n", time);
 }, "4n").start("8n");
+let lastTime = 3;
+let lastNote = null;
+let shortNoteBias = 0.0;
 const leadLoop = new Tone.Loop(time => {
-    console.log(playLeads);
     if (!playLeads) return;
     const rand = Math.random();
+    lastTime -= 1;
     let genieNoteNum;
     if (chordPlaying) {
         let scaleType = chordTypeMap[chordVoicing];
         let scale = chordPlaying.scale(scaleType);
         scale = [...scale.notes(), ...chordPlaying.scale(scaleType).interval("P8").notes()]
         let pianoNotes = scale.map(a => a.key());
-        console.log(scale);
         genieNoteNum = genie.nextFromKeyList(Math.floor(Math.random() * 7), pianoNotes);
     } else {
         genieNoteNum = genie.next(Math.floor(Math.random() * 7));
     }
     let genieNote = teoria.note.fromKey(genieNoteNum);
-    console.log("genieNoteNum:", genieNoteNum, "genieNote:", genieNote.scientific());
-    if (rand > 0.75) {
-        // 8th note
-        leadSynth.triggerAttackRelease(genieNote.scientific(), "8n");
-    } else if (rand > 0.5) {
+    // console.log("genieNoteNum:", genieNoteNum, "genieNote:", genieNote.scientific());
+    if (lastNote) {
+        leadSynth.triggerAttackRelease(genieNote.scientific(), lastNote);
+        lastNote = null;
+    } else if (rand > 0.5 + shortNoteBias && lastTime <= 0) {
+        // Play nothing
+    } else if (rand > 0.3 + shortNoteBias && lastTime <= 0) {
         // 4th note
         leadSynth.triggerAttackRelease(genieNote.scientific(), "4n");
+        lastTime = 2;
     } else {
+        // Play 8th note
+        leadSynth.triggerAttackRelease(genieNote.scientific(), "8n");
+        lastTime = 1;
+        lastNote = "8n";
     }
+    lastTime -= 1;
 }, "16n").start("8n");
 Tone.Transport.start();
 
@@ -230,11 +239,22 @@ export async function predictWebcam(video, gestureRecognizer, ctx) {
         }
 
         if (rightHand) {
+            console.log(rightHand.gesture);
+            if (rightHand.gesture === "ILoveYou" && prevRightGesture !== "ILoveYou") {
+                // Toggle Drums
+                drumToggle = !drumToggle
+                drumButton.checked = drumToggle;
+            }
             if (rightHand.gesture === "Open_Palm") {
                 if (prevRightGesture !== "Open_Palm") {
                     console.log("play leads");
                     playLeads = true;
+                    prevRightPos = rightHand.x;
+                } else {
+                    const normal = Math.min(1, Math.max(-1, (rightHand.x - prevRightPos) * 8));
+                    shortNoteBias = -0.3 * normal;
                 }
+                rightHand.gesture = "Open_Palm";
             } else if (prevRightGesture !== "Closed_Fist") {
                 console.log("stop leads");
                 playLeads = false;
