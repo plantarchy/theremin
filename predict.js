@@ -200,10 +200,10 @@ export async function predictWebcam(video, gestureRecognizer, ctx) {
         if (rightHand) {
             if (rightHand.gesture === "Open_Palm") {
                 if (prevRightGesture !== "Open_Palm") {
-                    let buttonNum = getButtonNum(rightHand.x);
-                    console.log("button:", buttonNum);
-                    //let genieNoteNum = genie.nextFromKeyList(Math.floor(Math.random() * 7), [40]);
-                    let genieNoteNum = genie.next(buttonNum, 1);
+                    //let buttonNum = getButtonNum(rightHand.x);
+                    //console.log("button:", buttonNum);
+                    let genieNoteNum = genie.nextFromKeyList(Math.floor(Math.random() * 7), [40]);
+                    //let genieNoteNum = genie.next(buttonNum, 1);
                     let genieNote = teoria.note.fromKey(genieNoteNum);
                     console.log("genieNoteNum:", genieNoteNum, "genieNote:", genieNote.scientific());
                     const now = Tone.now();
