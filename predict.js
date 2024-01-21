@@ -24,8 +24,8 @@ let chordPlaying = null;
 let chordReverb = new Tone.Freeverb().toDestination();
 let chordFilter = new Tone.Filter(20000, "lowpass").connect(chordReverb);
 let pitchShift = new Tone.PitchShift().connect(chordFilter);
-let chordSynth = new Tone.PolySynth(Tone.Synth).connect(pitchShift);
-chordSynth.set({ volume: -20 });
+let chordSynth = [0, 0, 0, 0].map(() => new Tone.Synth().connect(pitchShift));
+chordSynth.forEach(a => a.set({ volume: -20 }));
 console.log(chordSynth);
 
 let slideToggle = false;
@@ -89,29 +89,34 @@ export async function predictWebcam(video, gestureRecognizer, ctx) {
             if (leftHand.gesture === "Open_Palm") {
                 if (!chordPlaying) {
                     const now = Tone.now();
-                    chordSynth.releaseAll();
+                    chordSynth.map(a => a.triggerRelease());
                     const [root, freqs, adj] = getNotes(leftHand.x, leftHand.y);
-                    for (let freq of freqs) {
-                        chordSynth.triggerAttack(freq, now);
+                    for (let [i,freq] of freqs.entries()) {
+                        chordSynth[i].triggerAttack(freq, now);
                     }
                     chordPlaying = root;
                     prevLeftRot = leftHand.rot;
                 } else {
-                    // const [root, freqs, adj] = getNotes(leftHand.x, leftHand.y);
+                    if (slideToggle) {
+                        const [root, freqs, adj] = getNotes(leftHand.x, leftHand.y);
+                        for (let [i,freq] of freqs.entries()) {
+                            chordSynth[i].oscillator.frequency.rampTo(freq, 0.1);
+                        }
+                    }
                     // pitchShift.pitch = teoria.interval(root, chordPlaying).semitones() + (adj);
                 }
             } else if (leftHand.gesture === "Closed_Fist" && prevLeftGesture !== "Closed_Fist") {
                 const now = Tone.now();
-                chordSynth.releaseAll();
+                chordSynth.map(a => a.triggerRelease());
                 chordPlaying = null;
             }
-            if (slideToggle) {
-                const normal = Math.min(1, Math.max(-1, (leftHand.rot - prevLeftRot) / 60));
-                console.log(leftHand.rot);
-                if (Math.abs(normal) >= 0.05) {
-                    pitchShift.pitch = ((normal) * 2);
-                }
-            }
+            // if (slideToggle) {
+            //     const normal = Math.min(1, Math.max(-1, (leftHand.rot - prevLeftRot) / 60));
+            //     console.log(leftHand.rot);
+            //     if (Math.abs(normal) >= 0.05) {
+            //         pitchShift.pitch = ((normal) * 2);
+            //     }
+            // }
             prevLeftGesture = leftHand.gesture;
         }
 
