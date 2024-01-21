@@ -52,9 +52,9 @@ export function getNotes(x, y) {
 }
 
 //gets the piano genie button number
-export function getButtonNum(x) {
-    console.log("x:", x);
-    let button = (x-X_MAX_RIGHT) * 8 / (X_MIN_RIGHT - X_MAX_RIGHT);
-    button = Math.max(0, Math.min(Math.floor(button), 7));
+export function getButtonNum(y) {
+    console.log("y:", y);
+    let button = (y-Y_MAX) * 5 / (Y_MIN - Y_MAX);
+    button = Math.max(2, Math.min(Math.floor(button)+1, 5));
     return button;
 }

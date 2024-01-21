@@ -37,7 +37,7 @@ let leadSynth = new Tone.Synth({
         sustain: 1.0,
         release: 0.3
     },
-    volume: -10 
+    volume: -20 
 }).connect(leadFilter);
 
 let prevLeftGesture = null;
@@ -84,6 +84,7 @@ const loopB = new Tone.Loop(time => {
 let lastTime = 3;
 let lastNote = null;
 let shortNoteBias = 0.0;
+let globalButtonNum = 3;
 const leadLoop = new Tone.Loop(time => {
     if (!playLeads) return;
     const rand = Math.random();
@@ -94,9 +95,12 @@ const leadLoop = new Tone.Loop(time => {
         let scale = chordPlaying.scale(scaleType);
         scale = [...scale.notes(), ...chordPlaying.scale(scaleType).interval("P8").notes()]
         let pianoNotes = scale.map(a => a.key());
-        genieNoteNum = genie.nextFromKeyList(Math.floor(Math.random() * 7), pianoNotes);
+        
+        //genieNoteNum = genie.nextFromKeyList(Math.floor(Math.random() * 5+1), pianoNotes);
+        genieNoteNum = genie.nextFromKeyList(globalButtonNum, pianoNotes);
     } else {
-        genieNoteNum = genie.next(Math.floor(Math.random() * 7));
+        //genieNoteNum = genie.next(Math.floor(Math.random() * 5)+1);
+        genieNoteNum = genie.next(globalButtonNum);
     }
     let genieNote = teoria.note.fromKey(genieNoteNum);
     // console.log("genieNoteNum:", genieNoteNum, "genieNote:", genieNote.scientific());
@@ -251,6 +255,7 @@ export async function predictWebcam(video, gestureRecognizer, ctx) {
                 drumButton.checked = drumToggle;
             }
             if (rightHand.gesture === "Open_Palm") {
+                globalButtonNum = getButtonNum(rightHand.y);
                 if (prevRightGesture !== "Open_Palm") {
                     if (leadDropdown.innerText == "Sine") {
                         leadSynth.oscillator.type = 'sine';
