@@ -26,7 +26,7 @@ genie.initialize();
 Tone.start()
 
 let leadEnv = new Tone.AmplitudeEnvelope().toDestination();
-let leadFilter = new Tone.Filter(5000, "lowpass").connect(leadEnv);
+let leadFilter = new Tone.Filter(5000, "lowpass").toDestination();
 let leadSynth = new Tone.Synth({
     oscillator: {
         type: "sawtooth"
@@ -63,6 +63,7 @@ bpmInput.addEventListener("change", () => {
     amenBreak.playbackRate = bpmInput.value / 120;
 })
 
+let playLeads = false;
 let drumToggle = false;
 let drumSynth = new Tone.MembraneSynth().toDestination();
 let hihatSynth = new Tone.NoiseSynth().toDestination();
@@ -72,11 +73,30 @@ amenBreak.loop = true;
 drumSynth.set({ volume: -20 });
 hihatSynth.set({ volume: -20 });
 const loopA = new Tone.Loop(time => {
+    if (!drumToggle) return;
 	drumSynth.triggerAttackRelease("C2", "8n", time);
 }, "4n").start(0);
 const loopB = new Tone.Loop(time => {
+    if (!drumToggle) return;
  hihatSynth.triggerAttackRelease("4n", time);
 }, "4n").start("8n");
+const leadLoop = new Tone.Loop(time => {
+    console.log(playLeads);
+    if (!playLeads) return;
+    const rand = Math.random();
+    let genieNoteNum = genie.next(Math.floor(Math.random() * 7));
+    let genieNote = teoria.note.fromKey(genieNoteNum);
+    console.log("genieNoteNum:", genieNoteNum, "genieNote:", genieNote.scientific());
+    if (rand > 0.75) {
+        // 8th note
+        leadSynth.triggerAttackRelease(genieNote.scientific(), "8n");
+    } else if (rand > 0.5) {
+        // 4th note
+        leadSynth.triggerAttackRelease(genieNote.scientific(), "4n");
+    } else {
+    }
+}, "8n").start("8n");
+Tone.Transport.start();
 
 drumButton.addEventListener("click", () => {
     drumToggle = !drumToggle;
@@ -85,13 +105,11 @@ drumButton.addEventListener("click", () => {
             amenBreak.playbackRate = bpmInput.value / 120;
             amenBreak.start();
         } else {
-            Tone.Transport.start();
             console.log(bpmInput.value)
             Tone.Transport.bpm.value = bpmInput.value;
         }
     } else {
         amenBreak.stop();
-        Tone.Transport.stop()
     }
 })
 
@@ -201,18 +219,14 @@ export async function predictWebcam(video, gestureRecognizer, ctx) {
         if (rightHand) {
             if (rightHand.gesture === "Open_Palm") {
                 if (prevRightGesture !== "Open_Palm") {
-                    leadEnv.triggerAttack();
-
-                    //let buttonNum = getButtonNum(rightHand.x);
-                    //console.log("button:", buttonNum);
-                    let genieNoteNum = genie.next(Math.floor(Math.random() * 7));
-                    //let genieNoteNum = genie.next(buttonNum, 1);
-                    let genieNote = teoria.note.fromKey(genieNoteNum);
-                    console.log("genieNoteNum:", genieNoteNum, "genieNote:", genieNote.scientific());
-                    
+                    console.log("play leads");
+                    playLeads = true;
                 }
-
+            } else if (prevRightGesture !== "Closed_Fist") {
+                console.log("stop leads");
+                playLeads = false;
             }
+
             prevRightGesture = rightHand.gesture;
         }
 
