@@ -55,6 +55,11 @@ console.log(chordSynth);
 
 const drumButton = document.getElementById("majorBtn");
 const beatDropdown = document.getElementById("beat-option");
+const bpmInput = document.getElementById("labels-range-input");
+bpmInput.addEventListener("change", () => {
+    console.log(bpmInput.value)
+    Tone.Transport.bpm.value = bpmInput.value;
+})
 
 let drumToggle = false;
 let drumSynth = new Tone.MembraneSynth().toDestination();
@@ -74,12 +79,12 @@ const loopB = new Tone.Loop(time => {
 drumButton.addEventListener("click", () => {
     drumToggle = !drumToggle;
     if (drumToggle) {
-        console.log(beatDropdown)
         if (beatDropdown.innerText === "Amen Break") {
             amenBreak.start();
         } else {
-            Tone.Transport.start()
-            Tone.Transport.bpm.set(100)
+            Tone.Transport.start();
+            console.log(bpmInput.value)
+            Tone.Transport.bpm.value = bpmInput.value;
         }
     } else {
         amenBreak.stop();
