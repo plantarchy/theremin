@@ -57,6 +57,7 @@ console.log(chordSynth);
 
 const drumButton = document.getElementById("majorBtn");
 const beatDropdown = document.getElementById("beat-option");
+const leadDropdown = document.getElementById("lead-option");
 const bpmInput = document.getElementById("labels-range-input");
 bpmInput.addEventListener("change", () => {
     Tone.Transport.bpm.value = bpmInput.value;
@@ -236,6 +237,10 @@ export async function predictWebcam(video, gestureRecognizer, ctx) {
             //     }
             // }
             prevLeftGesture = leftHand.gesture;
+        } else {
+            const now = Tone.now();
+            chordSynth.map(a => { a.triggerRelease(); a.set({ volume: -1000 }) });
+            chordPlaying = null;
         }
 
         if (rightHand) {
@@ -247,6 +252,15 @@ export async function predictWebcam(video, gestureRecognizer, ctx) {
             }
             if (rightHand.gesture === "Open_Palm") {
                 if (prevRightGesture !== "Open_Palm") {
+                    if (leadDropdown.innerText == "Sine") {
+                        leadSynth.oscillator.type = 'sine';
+                    } else if (leadDropdown.innerText == "Square") {
+                        leadSynth.oscillator.type = 'square';
+                    } else if (leadDropdown.innerText == "Triangle") {
+                        leadSynth.oscillator.type = 'triangle';
+                    } else if (leadDropdown.innerText == "Saw") {
+                        leadSynth.oscillator.type = 'sawtooth';
+                    }
                     console.log("play leads");
                     playLeads = true;
                     prevRightPos = rightHand.x;
@@ -261,6 +275,8 @@ export async function predictWebcam(video, gestureRecognizer, ctx) {
             }
 
             prevRightGesture = rightHand.gesture;
+        } else {
+            playLeads = false;
         }
 
         ctx.restore();
