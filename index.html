@@ -158,125 +158,87 @@
             </script>
 
           </div>
-    
+          <!-- LEAD DROP DOWN MENU -->
           <div class="py-3">
             <p class="text-2xl text-stone-700">Lead</p>
             <div class="relative inline-block text-left">
-              <div>
-                <button type="button"
-                  class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                  id="menu-button" aria-expanded="false" aria-haspopup="true">
-                  Pick Lead
-                  <svg class="-mr-1 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path fill-rule="evenodd"
-                      d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                      clip-rule="evenodd" />
-                  </svg>
-                </button>
-              </div>
-    
-              <!-- Dropdown menu, hidden by default -->
-              <div
-                id = "lead-drop"
-                class="absolute left-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none hidden"
-                role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
-                <div class="py-1" role="none">
-                  <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
-                  <a href="#" class="text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1"
-                    id="l_menu-item-0">Sine</a>
-                  <a href="#" class="text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1"
-                    id="l_menu-item-1">Square</a>
-                  <a href="#" class="text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1"
-                    id="l_menu-item-2">Triangle</a>
-                  <a href="#" class="text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1"
-                    id="l_menu-item-3">Saw</a>
-                </div>
-              </div>
-            </div>
-          </div>
-    
-          <script>
-            document.addEventListener('DOMContentLoaded', function () {
-              const button = document.getElementById('menu-button');
-              const dropdown = document.getElementById('lead-drop');
-
-              button.addEventListener('click', function () {
-                // Toggle the "hidden" class on the dropdown menu
-                dropdown.classList.toggle('hidden');
-
-                // Toggle the "aria-expanded" attribute on the button
-                const isExpanded = button.getAttribute('aria-expanded') === 'true';
-                button.setAttribute('aria-expanded', (!isExpanded).toString());
-              });
-
-              // Close the dropdown when clicking outside of it
-              document.addEventListener('click', function (event) {
-                if (!button.contains(event.target) && !dropdown.contains(event.target)) {
-                  dropdown.classList.add('hidden');
-                  button.setAttribute('aria-expanded', 'false');
-                }
-              });
-            });
-          </script>
-    
-         <!--pop hiphop trap  -->
-         <div class="py-3">
-          <p class="text-2xl text-stone-700">Beat Style</p>
-          <div class="relative inline-block text-left">
-            <div>
-              <button type="button" id="beat-menu"
-                class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                aria-expanded="false" aria-haspopup="true">
-                Pick Beat
+              <button id="lead-btn" type="button"
+                class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500">
+                <span id="lead-option">Select a Lead</span>
+              
                 <svg class="-mr-1 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path fill-rule="evenodd"
                     d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
                     clip-rule="evenodd" />
                 </svg>
               </button>
-            </div>
-  
-            <!-- Dropdown menu, hidden by default -->
-            <div
-              id = "beat-drop"
-              class="absolute left-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none hidden"
-              role="menu" aria-orientation="vertical" aria-labelledby="beat-menu" tabindex="-2">
-              <div class="py-1" role="none">
-                <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
-                <a href="#" class="text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-2"
-                  id="b_menu-item-0">Pop</a>
-                <a href="#" class="text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-2"
-                  id="b_menu-item-1">Hip-Hop</a>
-                <a href="#" class="text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-2"
-                  id="b_menu-item-2">Trap</a>
+              <div id="lead-dropdown" class="hidden absolute z-50 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                  <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="lead-btn">
+                      <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onclick="updateDropdownText('Sine')">Sine</a>
+                      <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onclick="updateDropdownText('Square')">Square</a>
+                      <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onclick="updateDropdownText('Triangle')">Triangle</a>
+                      <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onclick="updateDropdownText('Saw')">Saw</a>
+                  </div>
               </div>
-            </div>
-            </div>
-            
-            <script>
-              document.addEventListener('DOMContentLoaded', function () {
-                const button = document.getElementById('beat-menu');
-                const dropdown = document.getElementById('beat-drop');
-
-                button.addEventListener('click', function () {
-                  // Toggle the "hidden" class on the dropdown menu
-                  dropdown.classList.toggle('hidden');
-
-                  // Toggle the "aria-expanded" attribute on the button
-                  const isExpanded = button.getAttribute('aria-expanded') === 'true';
-                  button.setAttribute('aria-expanded', (!isExpanded).toString());
-                });
-
-                // Close the dropdown when clicking outside of it
-                document.addEventListener('click', function (event) {
-                  if (!button.contains(event.target) && !dropdown.contains(event.target)) {
-                    dropdown.classList.add('hidden');
-                    button.setAttribute('aria-expanded', 'false');
-                  }
-                });
+          </div>
+          
+          <script>
+              function updateDropdownText(text) {
+                  document.getElementById('lead-option').innerText = text;
+                  document.getElementById('lead-dropdown').classList.add('hidden');
+              }
+          
+              document.getElementById('lead-btn').addEventListener('click', function (event) {
+                  event.stopPropagation();
+                  const dropdownMenu = document.getElementById('lead-dropdown');
+                  dropdownMenu.classList.toggle('hidden');
               });
-            </script>
+          
+              document.addEventListener('click', function () {
+                  document.getElementById('lead-dropdown').classList.add('hidden');
+              });
+          </script> 
+    
+    <!-- BEAT DROP DOWN MENU -->
+         <div class="py-3">
+          <p class="text-2xl text-stone-700">Beat Style</p>
+          <div class="relative inline-block text-left">
+            <button id="beat-btn" type="button"
+              class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500">
+              <span id="beat-option">Select a Beat</span>
             
+              <svg class="-mr-1 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd"
+                  d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                  clip-rule="evenodd" />
+              </svg>
+            </button>
+            <div id="beat-dropdown" class="hidden absolute z-50 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="beat-btn">
+                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onclick="updateDropdownText('Pop')">Pop</a>
+                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onclick="updateDropdownText('Hip-Hop')">Hip-Hop</a>
+                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onclick="updateDropdownText('Trap')">Trap</a>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            function updateDropdownText(text) {
+                document.getElementById('beat-option').innerText = text;
+                document.getElementById('beat-dropdown').classList.add('hidden');
+            }
+        
+            document.getElementById('beat-btn').addEventListener('click', function (event) {
+                event.stopPropagation();
+                const dropdownMenu = document.getElementById('beat-dropdown');
+                dropdownMenu.classList.toggle('hidden');
+            });
+        
+            document.addEventListener('click', function () {
+                document.getElementById('beat-dropdown').classList.add('hidden');
+            });
+        </script> 
+          <!-- AUDIO OPTIONS -->
             <div class="py-3">
               <p class="text-2xl text-stone-700 ">Audio Options</p>
             <label class="switch" for="slideToggle">
@@ -292,6 +254,10 @@
                 <span class="slider"></span>
             </label>
             <span class="text-stone-700 text-xl" style="vertical-align: top; padding-top: 5px;">Major / Minor</span>
+            </div>
+
+            <div>
+              
             </div>
 
             <p class="text-2xl text-stone-700 ">BPM</p>
