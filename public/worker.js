@@ -10,7 +10,7 @@ self.onmessage = async (e) => {
         postMessage({ fyi: 'model initialized' });
     }
 
-    const output = await mvae.sample(1);
+    const output = await mvae.sample(1, 0.3, qpm=tempo);
     // Send main script the result.
     postMessage({ sample: output[0] });
 };

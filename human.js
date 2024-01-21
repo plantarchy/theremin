@@ -18,16 +18,15 @@ vaeWorker.postMessage({});
 
 let slideToggle = document.getElementById("slideToggle").ariaChecked;
 
-
+let tempo = 120 * 4; //interface
 
 
 export class Human {
     constructor(id, video, pose, hands, ctx, onExpire) {
         this.player = new core.Player();
+        this.player.setTempo(tempo)
         this.errorCounter = 5;
         this.intervalCounter = 0;
-
-        Tone.Transport.bpm.value = 120;
 
         this.chordReverb = new Tone.Freeverb().toDestination();
         this.chordFilter = new Tone.Filter(20000, "lowpass").connect(this.chordReverb);
@@ -48,15 +47,6 @@ export class Human {
             volume: 0
         }).toDestination();
 
-        //Tone.Transport.scheduleRepeat(time => {
-        //    osc.start(time).stop(time + 0.2);
-        //}, "4n");
-
-
-        this.leadSynth.sync();
-        //this.chordSynth.sync();
-        Tone.Transport.start();
-
         this.playing = [];
         this.video = video;
         this.ctx = ctx;
@@ -73,8 +63,6 @@ export class Human {
         this.prevLeftPos = null;
         this.prevRightGesture = null;
         
-        //magenta stuff
-        this.player = new core.Player();
 
     }
 
@@ -144,7 +132,7 @@ export class Human {
                 const now = Tone.now();
                 this.chordSynth.triggerRelease(this.playing, now);
                 this.playing = [];
-                const normal = (Math.max(0.20, Math.min(0.80, this.leftHand.y)) - 0.20) * (1 / 0.60);
+                const normal = (Math.max(0.20, Math.min(0.80, 1-this.leftHand.y)) - 0.20) * (1 / 0.60);
                 const note = notes[Math.min(Math.floor(normal * notes.length), notes.length - 1)];
                 console.log(normal, note, teoria.note(note));
                 const chord = teoria.note(note).chord("maj"); //FRONT END INTEGRATION
@@ -154,7 +142,6 @@ export class Human {
                 }
                 this.prevLeftPos = normal;
             } else {
-                const now = Tone.now();
                 if (slideToggle) {
                     const normal = (Math.max(0.20, Math.min(0.80, this.leftHand.y)) - 0.20) * (1 / 0.60);
                     this.pitchShift.pitch = ((normal - this.prevLeftPos) * 4);
@@ -194,24 +181,6 @@ export class Human {
         };
     }
 
-    getNose() {
-        const nose = this.pose.keypoints[0];
-        return {...nose, x: nose.x / this.video.videoWidth, y: nose.y / this.video.videoHeight };
-    }
-
-    getLeftFoot() {
-        const foot = this.pose.keypoints[15];
-        return {...foot, x: foot.x / this.video.videoWidth, y: foot.y / this.video.videoHeight };
-    }
-
-    getRightFoot() {
-        const foot = this.pose.keypoints[16];
-        return {...foot, x: foot.x / this.video.videoWidth, y: foot.y / this.video.videoHeight };
-    }
-
-    getLeftHand() {
-    }
-
     resetExpiry() {
         clearTimeout(this.expiry);
         clearTimeout(this.expiry2);
@@ -234,7 +203,7 @@ async function leadMelody(human) {
       const sample = event.data.sample;
       console.log(sample);
       try {
-        await human.player.start(sample);
+        await human.player.start(sample, tempo);
         vaeWorker.postMessage({});
       } catch (e) {}
     }

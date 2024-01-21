@@ -19,7 +19,7 @@ document.getElementById("playButton").addEventListener("click", () => {
     } else {
       const sample = event.data.sample;
       console.log("Sampel", sample);
-      await player.start(sample);
+      await player.start(sample, tempo);
       worker.postMessage({});
       // Do something with this sample
     }
