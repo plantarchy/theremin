@@ -6,6 +6,7 @@ import {
 import * as Tone from 'tone';
 import * as teoria from 'teoria';
 import * as core from '@magenta/music/esm/core';
+import { getNotes } from './theory';
 
 const notes = ["C4", "D4", "E4", "F4", "G4", "A4", "B4"];
 let lastVideoTime = -1;
@@ -19,12 +20,13 @@ let prevLeftPos = null;
 let prevRightPos = null;
 let prevLeftRot = 0;
 let prevRightRot = 0;
-let chordPlaying = false;
+let chordPlaying = null;
 let chordReverb = new Tone.Freeverb().toDestination();
 let chordFilter = new Tone.Filter(20000, "lowpass").connect(chordReverb);
 let pitchShift = new Tone.PitchShift().connect(chordFilter);
 let chordSynth = new Tone.PolySynth(Tone.Synth).connect(pitchShift);
 chordSynth.set({ volume: -20 });
+console.log(chordSynth);
 
 let slideToggle = false;
 document.getElementById("slideToggle").addEventListener("click", () => {
@@ -86,23 +88,22 @@ export async function predictWebcam(video, gestureRecognizer, ctx) {
         if (leftHand) {
             if (leftHand.gesture === "Open_Palm") {
                 if (!chordPlaying) {
-                    chordPlaying = true;
                     const now = Tone.now();
                     chordSynth.releaseAll();
-                    const normal = (Math.max(0.20, Math.min(0.80, 1-leftHand.y)) - 0.20) * (1 / 0.60);
-                    const note = notes[Math.min(Math.floor(normal * notes.length), notes.length - 1)];
-                    console.log(normal, note, teoria.note(note));
-                    const chord = teoria.note(note).chord("maj"); //FRONT END INTEGRATION
-                    for (let n of chord.notes()) {
-                        chordSynth.triggerAttack(n.scientific(), now);
+                    const [root, freqs, adj] = getNotes(leftHand.x, leftHand.y);
+                    for (let freq of freqs) {
+                        chordSynth.triggerAttack(freq, now);
                     }
-                    prevLeftPos = normal;
+                    chordPlaying = root;
                     prevLeftRot = leftHand.rot;
+                } else {
+                    // const [root, freqs, adj] = getNotes(leftHand.x, leftHand.y);
+                    // pitchShift.pitch = teoria.interval(root, chordPlaying).semitones() + (adj);
                 }
             } else if (leftHand.gesture === "Closed_Fist" && prevLeftGesture !== "Closed_Fist") {
                 const now = Tone.now();
                 chordSynth.releaseAll();
-                chordPlaying = false;
+                chordPlaying = null;
             }
             if (slideToggle) {
                 const normal = Math.min(1, Math.max(-1, (leftHand.rot - prevLeftRot) / 60));
