@@ -25,7 +25,8 @@ genie.initialize();
 
 Tone.start()
 
-
+let leadEnv = new Tone.AmplitudeEnvelope().toDestination();
+let leadFilter = new Tone.Filter(5000, "lowpass").connect(leadEnv);
 let leadSynth = new Tone.Synth({
     oscillator: {
         type: "sawtooth"
@@ -36,8 +37,8 @@ let leadSynth = new Tone.Synth({
         sustain: 1.0,
         release: 0.3
     },
-    volume: 0
-}).toDestination();
+    volume: -10 
+}).connect(leadFilter);
 
 let prevLeftGesture = null;
 let prevRightGesture = null;
@@ -200,14 +201,14 @@ export async function predictWebcam(video, gestureRecognizer, ctx) {
         if (rightHand) {
             if (rightHand.gesture === "Open_Palm") {
                 if (prevRightGesture !== "Open_Palm") {
+                    leadEnv.triggerAttack();
+
                     //let buttonNum = getButtonNum(rightHand.x);
                     //console.log("button:", buttonNum);
-                    let genieNoteNum = genie.nextFromKeyList(Math.floor(Math.random() * 7), [40]);
+                    let genieNoteNum = genie.next(Math.floor(Math.random() * 7));
                     //let genieNoteNum = genie.next(buttonNum, 1);
                     let genieNote = teoria.note.fromKey(genieNoteNum);
                     console.log("genieNoteNum:", genieNoteNum, "genieNote:", genieNote.scientific());
-                    const now = Tone.now();
-                    leadSynth.triggerAttackRelease(genieNote.scientific(), "8n", now);
                     
                 }
 
