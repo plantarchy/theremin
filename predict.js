@@ -6,7 +6,7 @@ import {
 import * as Tone from 'tone';
 import * as teoria from 'teoria';
 import * as core from '@magenta/music/esm/core';
-import { getNotes, getButtonNum } from './theory';
+import { getNotes, getButtonNum, chordTypeMap } from './theory';
 import * as pg from '@magenta/music/esm/piano_genie'
 import * as pl from '@magenta/music/esm/core/player'
 
@@ -47,6 +47,7 @@ let prevRightPos = null;
 let prevLeftRot = 0;
 let prevRightRot = 0;
 let chordPlaying = null;
+let chordVoicing = null;
 let chordReverb = new Tone.Freeverb().toDestination();
 let chordFilter = new Tone.Filter(20000, "lowpass").connect(chordReverb);
 let pitchShift = new Tone.PitchShift().connect(chordFilter);
@@ -84,7 +85,17 @@ const leadLoop = new Tone.Loop(time => {
     console.log(playLeads);
     if (!playLeads) return;
     const rand = Math.random();
-    let genieNoteNum = genie.next(Math.floor(Math.random() * 7));
+    let genieNoteNum;
+    if (chordPlaying) {
+        let scaleType = chordTypeMap[chordVoicing];
+        let scale = chordPlaying.scale(scaleType);
+        scale = [...scale.notes(), ...chordPlaying.scale(scaleType).interval("P8").notes()]
+        let pianoNotes = scale.map(a => a.key());
+        console.log(scale);
+        genieNoteNum = genie.nextFromKeyList(Math.floor(Math.random() * 7), pianoNotes);
+    } else {
+        genieNoteNum = genie.next(Math.floor(Math.random() * 7));
+    }
     let genieNote = teoria.note.fromKey(genieNoteNum);
     console.log("genieNoteNum:", genieNoteNum, "genieNote:", genieNote.scientific());
     if (rand > 0.75) {
@@ -95,7 +106,7 @@ const leadLoop = new Tone.Loop(time => {
         leadSynth.triggerAttackRelease(genieNote.scientific(), "4n");
     } else {
     }
-}, "8n").start("8n");
+}, "16n").start("8n");
 Tone.Transport.start();
 
 drumButton.addEventListener("click", () => {
@@ -175,16 +186,18 @@ export async function predictWebcam(video, gestureRecognizer, ctx) {
                 if (!chordPlaying) {
                     const now = Tone.now();
                     chordSynth.map(a => { a.triggerRelease(); a.set({ volume: -1000 }) });
-                    const [root, freqs, adj] = getNotes(leftHand.x, leftHand.y);
+                    const [root, voicing, freqs, adj] = getNotes(leftHand.x, leftHand.y);
                     for (let [i,freq] of freqs.entries()) {
                         chordSynth[i].set({ volume: -20 });
                         chordSynth[i].triggerAttack(freq, now);
                     }
                     chordPlaying = root;
+                    chordVoicing = voicing;
                     prevLeftRot = leftHand.rot;
                 } else {
                     if (slideToggle) {
-                        const [root, freqs, adj] = getNotes(leftHand.x, leftHand.y);
+                        const [root, voicing, freqs, adj] = getNotes(leftHand.x, leftHand.y);
+                        chordVoicing = voicing;
                         for (let [i,synth] of chordSynth.entries()) {
                             if (!freqs[i]) {
                                 chordSynth[i].triggerRelease();

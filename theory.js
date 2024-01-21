@@ -22,6 +22,14 @@ let chords = ["M", "maj7", "7", "min7", "min"]
 // }
 console.log("len", scale);
 
+export let chordTypeMap = {
+    "M": "ionian",
+    "maj7": "ionian",
+    "7": "lydian",
+    "min7": "lydian",
+    "min": "dorian",
+}
+
 export function getNotes(x, y) {
     let row = (y - Y_MIN) * chords.length / (Y_MAX - Y_MIN);
     let col = (x - X_MIN_LEFT) * scale.length / (X_MAX_LEFT - X_MIN_LEFT);
@@ -40,7 +48,7 @@ export function getNotes(x, y) {
     console.log(note.scientific(), chords[row], chord.map(a => a.scientific()));
     displayChord(note.chord(chords[row]).name)
     
-    return [note, chord.map(a => a.fq()), xadj];
+    return [note, chords[row], chord.map(a => a.fq()), xadj];
 }
 
 //gets the piano genie button number
