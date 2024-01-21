@@ -6,14 +6,39 @@ import {
 import * as Tone from 'tone';
 import * as teoria from 'teoria';
 import * as core from '@magenta/music/esm/core';
-import { getNotes } from './theory';
+import { getNotes, getButtonNum } from './theory';
+import * as pg from '@magenta/music/esm/piano_genie'
+import * as pl from '@magenta/music/esm/core/player'
 
+//chords in letter notation
 const notes = ["C4", "D4", "E4", "F4", "G4", "A4", "B4"];
 let lastVideoTime = -1;
 const canvas = document.querySelector("#video-container canvas");
 const humans = {};
 
+//const worker = new Worker("/worker.js");
+// let LOWEST_PIANO_KEY_MIDI_NOTE = 21
+let GENIE_CHECKPOINT = 'https://storage.googleapis.com/magentadata/js/checkpoints/piano_genie/model/epiano/stp_iq_auto_contour_dt_166006';
+const genie = new pg.PianoGenie(GENIE_CHECKPOINT);
+const player = new pl.Player();
+genie.initialize();
+
 Tone.start()
+
+
+let leadSynth = new Tone.Synth({
+    oscillator: {
+        type: "sawtooth"
+    },
+    envelope: {
+        attack: 0.1,
+        decay: 0.2,
+        sustain: 1.0,
+        release: 0.3
+    },
+    volume: 0
+}).toDestination();
+
 let prevLeftGesture = null;
 let prevRightGesture = null;
 let prevLeftPos = null;
@@ -129,6 +154,24 @@ export async function predictWebcam(video, gestureRecognizer, ctx) {
             //     }
             // }
             prevLeftGesture = leftHand.gesture;
+        }
+
+        if (rightHand) {
+            if (rightHand.gesture === "Open_Palm") {
+                if (prevRightGesture !== "Open_Palm") {
+                    let buttonNum = getButtonNum(rightHand.x);
+                    console.log("button:", buttonNum);
+                    //let genieNoteNum = genie.nextFromKeyList(Math.floor(Math.random() * 7), [40]);
+                    let genieNoteNum = genie.next(buttonNum, 1);
+                    let genieNote = teoria.note.fromKey(genieNoteNum);
+                    console.log("genieNoteNum:", genieNoteNum, "genieNote:", genieNote.scientific());
+                    const now = Tone.now();
+                    leadSynth.triggerAttackRelease(genieNote.scientific(), "8n", now);
+                    
+                }
+
+            }
+            prevRightGesture = rightHand.gesture;
         }
 
         ctx.restore();

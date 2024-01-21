@@ -4,8 +4,6 @@ import {
     PoseLandmarker
 } from '@mediapipe/tasks-vision';
 import * as core from '@magenta/music/es6/core.js';
-import * as poseDetection from '@tensorflow-models/pose-detection';
-import * as tf from '@tensorflow/tfjs-core';
 import * as Tone from 'tone';
 
 const player = new core.Player();

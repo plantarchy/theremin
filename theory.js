@@ -1,7 +1,9 @@
 import * as teoria from 'teoria';
 
-let X_MIN = 1 - 0.10;
-let X_MAX = 1 - 0.45;
+let X_MIN_LEFT = 1 - 0.10;
+let X_MAX_LEFT = 1 - 0.45;
+let X_MIN_RIGHT = 0.50;
+let X_MAX_RIGHT = 0.10;
 let Y_MIN = 0.20;
 let Y_MAX = 0.91;
 
@@ -22,13 +24,13 @@ console.log("len", scale);
 
 export function getNotes(x, y) {
     let row = (y - Y_MIN) * chords.length / (Y_MAX - Y_MIN);
-    let col = (x - X_MIN) * scale.length / (X_MAX - X_MIN);
+    let col = (x - X_MIN_LEFT) * scale.length / (X_MAX_LEFT - X_MIN_LEFT);
     row = Math.max(0, Math.min(Math.floor(row), chords.length - 1));
     col = Math.max(0, Math.min(Math.floor(col), scale.length - 1));
 
-    let xpos = X_MIN + col * (X_MAX - X_MIN) / scale.length;
+    let xpos = X_MIN_LEFT + col * (X_MAX_LEFT - X_MIN_LEFT) / scale.length;
     let ypos = Y_MIN + row * (Y_MAX - Y_MIN) / chords.length;
-    let xadj = (x - xpos) * (X_MAX - X_MIN) / scale.length; // semitones
+    let xadj = (x - xpos) * (X_MAX_LEFT - X_MIN_LEFT) / scale.length; // semitones
 
     let note = scale[col];
     let chord = note.chord(chords[row]).notes();
@@ -39,4 +41,12 @@ export function getNotes(x, y) {
     displayChord(note.chord(chords[row]).name)
     
     return [note, chord.map(a => a.fq()), xadj];
+}
+
+//gets the piano genie button number
+export function getButtonNum(x) {
+    console.log("x:", x);
+    let button = (x-X_MAX_RIGHT) * 8 / (X_MIN_RIGHT - X_MAX_RIGHT);
+    button = Math.max(0, Math.min(Math.floor(button), 7));
+    return button;
 }
