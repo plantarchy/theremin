@@ -17,6 +17,9 @@ let prevLeftGesture = null;
 let prevRightGesture = null;
 let prevLeftPos = null;
 let prevRightPos = null;
+let prevLeftRot = 0;
+let prevRightRot = 0;
+let chordPlaying = false;
 let chordReverb = new Tone.Freeverb().toDestination();
 let chordFilter = new Tone.Filter(20000, "lowpass").connect(chordReverb);
 let pitchShift = new Tone.PitchShift().connect(chordFilter);
@@ -52,12 +55,16 @@ export async function predictWebcam(video, gestureRecognizer, ctx) {
                 rightHand = {
                     x: landmarks[0].x,
                     y: landmarks[0].y,
+                    z: landmarks[0].z,
+                    rot: Math.atan2((landmarks[9].y - landmarks[0].y), (landmarks[9].x - landmarks[0].x)) * 180 / Math.PI,
                     gesture: handResults.gestures[index][0].categoryName
                 };
             } else if (handResults.handedness[index][0].categoryName === "Right") {
                 leftHand = {
                     x: landmarks[0].x,
                     y: landmarks[0].y,
+                    z: landmarks[0].z,
+                    rot: Math.atan2(-(landmarks[9].y - landmarks[0].y), (landmarks[9].x - landmarks[0].x)) * 180 / Math.PI,
                     gesture: handResults.gestures[index][0].categoryName
                 };
             }
@@ -78,7 +85,8 @@ export async function predictWebcam(video, gestureRecognizer, ctx) {
 
         if (leftHand) {
             if (leftHand.gesture === "Open_Palm") {
-                if (prevLeftGesture !== "Open_Palm") {
+                if (!chordPlaying) {
+                    chordPlaying = true;
                     const now = Tone.now();
                     chordSynth.releaseAll();
                     const normal = (Math.max(0.20, Math.min(0.80, 1-leftHand.y)) - 0.20) * (1 / 0.60);
@@ -89,15 +97,19 @@ export async function predictWebcam(video, gestureRecognizer, ctx) {
                         chordSynth.triggerAttack(n.scientific(), now);
                     }
                     prevLeftPos = normal;
-                } else {
-                    if (slideToggle) {
-                        const normal = (Math.max(0.20, Math.min(0.80, leftHand.y)) - 0.20) * (1 / 0.60);
-                        pitchShift.pitch = ((normal - prevLeftPos) * -4);
-                    }
+                    prevLeftRot = leftHand.rot;
                 }
             } else if (leftHand.gesture === "Closed_Fist" && prevLeftGesture !== "Closed_Fist") {
                 const now = Tone.now();
                 chordSynth.releaseAll();
+                chordPlaying = false;
+            }
+            if (slideToggle) {
+                const normal = Math.min(1, Math.max(-1, (leftHand.rot - prevLeftRot) / 60));
+                console.log(leftHand.rot);
+                if (Math.abs(normal) >= 0.05) {
+                    pitchShift.pitch = ((normal) * 2);
+                }
             }
             prevLeftGesture = leftHand.gesture;
         }
