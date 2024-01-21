@@ -36,5 +36,7 @@ export function getNotes(x, y) {
     // console.log(note.chord(chords[col]).notes().map(a => a.scientific()));
     // return note.chord(chords[col]).notes().map(a => (a.fq() * 2 ** (xadj/12)));
     console.log(note.scientific(), chords[row], chord.map(a => a.scientific()));
+    displayChord(note.chord(chords[row]).name)
+    
     return [note, chord.map(a => a.fq()), xadj];
 }

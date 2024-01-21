@@ -170,7 +170,7 @@
             <div class="relative inline-block text-left">
                 <button id="lead-btn" type="button"
                         class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500">
-                    <span id="lead-option">Select two Lead</span>
+                    <span id="lead-option">Select a Lead</span>
         
                     <svg class="-mr-1 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                         <path fill-rule="evenodd"
@@ -287,19 +287,18 @@
           </div>
 
           <div class="border-b border-gray-300 pb-3"></div>
-          <div class="text-2xl text-stone-700">Notes:</div>
+          <div class="text-2xl text-stone-700 my-4 inline-flex items-center">Current Chord:
 
-          <div id="wordContainer" class="max-w-md mx-auto bg-white p-4 rounded shadow mb-4"></div>
-          
+          <div id="wordContainer" class="max-w-md pt-2 ml-3"></div>
+        </div> 
           <script>
             const recentWords = [];
 
             // Function to log a word and update the display
-            function logWord(word) {
+            function displayChord(word) {
               recentWords.push(word);
 
-              // Keep only the last 5 words (or adjust as needed)
-              if (recentWords.length > 5) {
+              if (recentWords.length > 1) {
                 recentWords.shift();
               }
 
@@ -323,12 +322,6 @@
               });
             }
 
-            // Example: Log words on user actions
-            logWord('Action 1');
-            logWord('Action 2');
-            logWord('Action 3');
-
-            // You can call logWord whenever you want to log a new word
 
           </script>
             </div>
