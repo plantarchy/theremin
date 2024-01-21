@@ -53,14 +53,39 @@ let chordSynth = [0, 0, 0, 0, 0].map(() => new Tone.Synth().connect(pitchShift))
 chordSynth.forEach(a => a.set({ volume: -1000 }));
 console.log(chordSynth);
 
+const drumButton = document.getElementById("majorBtn");
+const beatDropdown = document.getElementById("beat-option");
+
+let drumToggle = false;
 let drumSynth = new Tone.MembraneSynth().toDestination();
-console.log(drumSynth.volume)
+let hihatSynth = new Tone.NoiseSynth().toDestination();
+let amenBreak = new Tone.Player("/Amen-break.wav").toDestination();
+amenBreak.loop = true;
+
 drumSynth.set({ volume: -20 });
+hihatSynth.set({ volume: -20 });
 const loopA = new Tone.Loop(time => {
 	drumSynth.triggerAttackRelease("C2", "8n", time);
 }, "4n").start(0);
-Tone.Transport.start()
-Tone.Transport.bpm.set(100)
+const loopB = new Tone.Loop(time => {
+ hihatSynth.triggerAttackRelease("4n", time);
+}, "4n").start("8n");
+
+drumButton.addEventListener("click", () => {
+    drumToggle = !drumToggle;
+    if (drumToggle) {
+        console.log(beatDropdown)
+        if (beatDropdown.innerText === "Amen Break") {
+            amenBreak.start();
+        } else {
+            Tone.Transport.start()
+            Tone.Transport.bpm.set(100)
+        }
+    } else {
+        amenBreak.stop();
+        Tone.Transport.stop()
+    }
+})
 
 let slideToggle = false;
 document.getElementById("slideToggle").addEventListener("click", () => {
