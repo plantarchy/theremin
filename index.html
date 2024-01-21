@@ -10,8 +10,13 @@
     <body class="min-h-screen justify-center bg-stone-800">
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Lora&display=swap');
-        </style>
-      <button type="button" class="focus:outline-none text-3xl pt-5 text-zinc-200" style="font-family: 'Lora', serif;">theremin</button>
+        </style> 
+     <button id="backtosplash" type="button"  style="font-family: 'Lora', serif;" class="focus:outline-none text-3xl pt-5 text-zinc-200">theremin</button>
+     <script type="text/javascript">
+       document.getElementById("backtosplash").onclick = function () {
+         location.href = "//localhost:5173/splash"
+       };
+     </script>
       <div id="content" class="flex flex-row gap-5 content-center">
         <!-- VIDEO -->
         <div class="flex-basis-5/7" id="video-container">
@@ -283,6 +288,49 @@
 
           <div class="border-b border-gray-300 pb-3"></div>
           <div class="text-2xl text-stone-700">Notes:</div>
+
+          <div id="wordContainer" class="max-w-md mx-auto bg-white p-4 rounded shadow mb-4"></div>
+          
+          <script>
+            const recentWords = [];
+
+            // Function to log a word and update the display
+            function logWord(word) {
+              recentWords.push(word);
+
+              // Keep only the last 5 words (or adjust as needed)
+              if (recentWords.length > 5) {
+                recentWords.shift();
+              }
+
+              // Update the display
+              updateDisplay();
+            }
+
+            // Function to update the display with recent words
+            function updateDisplay() {
+              const wordContainer = document.getElementById('wordContainer');
+
+              // Clear the container
+              wordContainer.innerHTML = '';
+
+              // Display each recent word
+              recentWords.forEach((word) => {
+                const wordElement = document.createElement('div');
+                wordElement.textContent = word;
+                wordElement.classList.add('mb-2');
+                wordContainer.appendChild(wordElement);
+              });
+            }
+
+            // Example: Log words on user actions
+            logWord('Action 1');
+            logWord('Action 2');
+            logWord('Action 3');
+
+            // You can call logWord whenever you want to log a new word
+
+          </script>
             </div>
       </div>
       <div id="warning-div" role="alert"
