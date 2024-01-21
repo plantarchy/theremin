@@ -25,7 +25,7 @@ let chordReverb = new Tone.Freeverb().toDestination();
 let chordFilter = new Tone.Filter(20000, "lowpass").connect(chordReverb);
 let pitchShift = new Tone.PitchShift().connect(chordFilter);
 let chordSynth = [0, 0, 0, 0, 0].map(() => new Tone.Synth().connect(pitchShift));
-chordSynth.forEach(a => a.set({ volume: -20 }));
+chordSynth.forEach(a => a.set({ volume: -1000 }));
 console.log(chordSynth);
 
 let slideToggle = false;
@@ -89,9 +89,10 @@ export async function predictWebcam(video, gestureRecognizer, ctx) {
             if (leftHand.gesture === "Open_Palm") {
                 if (!chordPlaying) {
                     const now = Tone.now();
-                    chordSynth.map(a => a.triggerRelease());
+                    chordSynth.map(a => { a.triggerRelease(); a.set({ volume: -1000 }) });
                     const [root, freqs, adj] = getNotes(leftHand.x, leftHand.y);
                     for (let [i,freq] of freqs.entries()) {
+                        chordSynth[i].set({ volume: -20 });
                         chordSynth[i].triggerAttack(freq, now);
                     }
                     chordPlaying = root;
@@ -99,15 +100,25 @@ export async function predictWebcam(video, gestureRecognizer, ctx) {
                 } else {
                     if (slideToggle) {
                         const [root, freqs, adj] = getNotes(leftHand.x, leftHand.y);
-                        for (let [i,freq] of freqs.entries()) {
-                            chordSynth[i].oscillator.frequency.rampTo(freq, 0.1);
+                        for (let [i,synth] of chordSynth.entries()) {
+                            if (!freqs[i]) {
+                                chordSynth[i].triggerRelease();
+                                chordSynth[i].set({ volume: -1000 });
+                                synth.oscillator.frequency.set(0);
+                            } else if (synth.volume.value === -1000) {
+                                const now = Tone.now();
+                                chordSynth[i].set({ volume: -20 });
+                                chordSynth[i].triggerAttack(freqs[i], now);
+                            } else {
+                                chordSynth[i].oscillator.frequency.rampTo(freqs[i], 0.1);
+                            }
                         }
                     }
                     // pitchShift.pitch = teoria.interval(root, chordPlaying).semitones() + (adj);
                 }
-            } else if (leftHand.gesture === "Closed_Fist" && prevLeftGesture !== "Closed_Fist") {
+            } else if (prevLeftGesture !== "Closed_Fist") {
                 const now = Tone.now();
-                chordSynth.map(a => a.triggerRelease());
+                chordSynth.map(a => { a.triggerRelease(); a.set({ volume: -1000 }) });
                 chordPlaying = null;
             }
             // if (slideToggle) {
