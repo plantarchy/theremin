@@ -24,7 +24,7 @@ let chordPlaying = null;
 let chordReverb = new Tone.Freeverb().toDestination();
 let chordFilter = new Tone.Filter(20000, "lowpass").connect(chordReverb);
 let pitchShift = new Tone.PitchShift().connect(chordFilter);
-let chordSynth = [0, 0, 0, 0].map(() => new Tone.Synth().connect(pitchShift));
+let chordSynth = [0, 0, 0, 0, 0].map(() => new Tone.Synth().connect(pitchShift));
 chordSynth.forEach(a => a.set({ volume: -20 }));
 console.log(chordSynth);
 

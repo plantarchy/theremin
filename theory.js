@@ -10,6 +10,7 @@ let grid = [];
 
 // Generate C, D, E, F, G etc chords (intermediates can be filled in)
 let scale = teoria.note("c4").scale("chromatic").notes()
+scale.push(teoria.note("c5"));
 let chords = ["M", "maj7", "7", "min7", "min"]
 // for (let [index, note] of scale.notes().entries()) {
 //     let xpos = X_MIN + index * (X_MAX - X_MIN) / scale.notes().length;
