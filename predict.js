@@ -59,6 +59,7 @@ const bpmInput = document.getElementById("labels-range-input");
 bpmInput.addEventListener("change", () => {
     console.log(bpmInput.value)
     Tone.Transport.bpm.value = bpmInput.value;
+    amenBreak.playbackRate = bpmInput.value / 120;
 })
 
 let drumToggle = false;
@@ -80,6 +81,7 @@ drumButton.addEventListener("click", () => {
     drumToggle = !drumToggle;
     if (drumToggle) {
         if (beatDropdown.innerText === "Amen Break") {
+            amenBreak.playbackRate = bpmInput.value / 120;
             amenBreak.start();
         } else {
             Tone.Transport.start();
