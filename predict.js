@@ -102,16 +102,16 @@ const leadLoop = new Tone.Loop(time => {
     if (lastNote) {
         leadSynth.triggerAttackRelease(genieNote.scientific(), lastNote);
         lastNote = null;
-    } else if (rand > 0.5 + shortNoteBias && lastTime <= 0) {
+    } else if (rand > 0.5 + shortNoteBias || lastTime > 0) {
         // Play nothing
-    } else if (rand > 0.3 + shortNoteBias && lastTime <= 0) {
+    } else if (rand > Math.max(0, 0.3 + shortNoteBias)) {
         // 4th note
         leadSynth.triggerAttackRelease(genieNote.scientific(), "4n");
-        lastTime = 2;
+        lastTime = 4;
     } else {
         // Play 8th note
         leadSynth.triggerAttackRelease(genieNote.scientific(), "8n");
-        lastTime = 1;
+        lastTime = 2;
         lastNote = "8n";
     }
     lastTime -= 1;
